@@ -114,20 +114,43 @@ ifeq ($(OS),DEBIAN)
   LNCURSES=-lncurses 
 endif
 
-
 INCLUDES=-Isrc/classes $(IOPENCV) $(IROOT)
 
-all: $(BINDIR)/speckle-analyzer 
+CLASSES=$(CLASSES_SRC_DIR)/Base.h      $(CLASSES_SRC_DIR)/Base.cpp     \
+        $(CLASSES_SRC_DIR)/NIST.h         $(CLASSES_SRC_DIR)/NIST.cpp 
+DESKTOP_EXECUTABLES=$(EXEC_SRC_DIR)/LIBStuff.cpp   $(EXEC_SRC_DIR)/LIBStuff.h
 
-$(OBJDIR)/LIBStuff: $(EXEC_SRC_DIR)/LIBStuff.cpp $(EXEC_SRC_DIR)/LIBStuff.h 
+SOURCES=$(CLASSES) $(DESKTOP_EXECUTABLES)
+
+
+all: $(BINDIR)/LIBStuff   $(CLASSES_SRC_DIR)/BuildNumber.h
+
+$(OBJDIR)/LIBStuff: $(EXEC_SRC_DIR)/LIBStuff.cpp \
+	                  $(EXEC_SRC_DIR)/LIBStuff.h   \
+	                  $(OBJDIR)/NIST.o
 	@echo 'LIBStuff'
-	$(COMPILER) $(EXEC_SRC_DIR)/LIBStuff.cpp  \
-               $(INCLUDES) $(LROOT) \
-               -o $(BINDIR)/LIBStuff
+	@$(COMPILER) $(EXEC_SRC_DIR)/LIBStuff.cpp  \
+	            $(OBJDIR)/NIST.o              \
+	            $(OBJDIR)/Base.o              \
+              $(INCLUDES) $(LROOT) \
+              -o $(BINDIR)/LIBStuff
 
-# $(OBJDIR)/View.o: $(CLASSES_SRC_DIR)/View.cpp $(CLASSES_SRC_DIR)/View.h 
-# 	@echo 'View.o'
-# 	@$(COMPILER) -c $(CLASSES_SRC_DIR)/View.cpp $(INCLUDES) -o $(OBJDIR)/View.o
+$(OBJDIR)/NIST.o: $(CLASSES_SRC_DIR)/NIST.cpp \
+	                $(CLASSES_SRC_DIR)/NIST.h   \
+	                $(OBJDIR)/Base.o
+
+	@echo 'NIST.o'
+	@$(COMPILER) -c $(CLASSES_SRC_DIR)/NIST.cpp $(INCLUDES) -o $(OBJDIR)/NIST.o
+
+$(OBJDIR)/Base.o: $(CLASSES_SRC_DIR)/Base.cpp \
+	                $(CLASSES_SRC_DIR)/Base.h 
+	@echo 'Base.o'
+	@$(COMPILER) -c $(CLASSES_SRC_DIR)/Base.cpp $(INCLUDES) -o $(OBJDIR)/Base.o
+
+# rule for build number generation
+$(CLASSES_SRC_DIR)/BuildNumber.h: $(SOURCES)
+	@sh make_buildnum.sh
+	@echo Generated new build number.
 
 clean:
 	@rm -rf bin/*
