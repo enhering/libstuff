@@ -35,6 +35,8 @@ ifeq ($(OS),MACOS)
   IROOT=-stdlib=libc++ -std=c++11 -m64 -I/Applications/root_v6.12.06/include
   LROOT=-Wl,-rpath,/Applications/root_v6.12.06/lib -L/Applications/root_v6.12.06/lib -lCore -lImt -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lTreePlayer -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lMultiProc -lpthread -stdlib=libc++ -lm -ldl
   
+  LCURL=-lcurl
+
   IMYSQLCPPCONN=-I/opt/local/include/
   LMYSQLCPPCONN=-L/opt/local/lib -lmysqlcppconn
 
@@ -53,35 +55,6 @@ ifeq ($(OS),MACOS)
   LNCURSES=-lncurses 
 endif
 
-ifeq ($(OS),FREEBSD)
-  COMPILER=clang++ -w
-  ICGICC=-I/usr/local/include/
-  LCGICC=-L/usr/local/lib -lcgicc
-
-  IOPENCV=-I/usr/local/include/opencv -I/usr/local/include
-  LOPENCV=-L/usr/local/lib -lopencv_calib3d -lopencv_contrib -lopencv_core -lopencv_features2d -lopencv_flann -lopencv_gpu -lopencv_highgui -lopencv_imgproc -lopencv_legacy -lopencv_ml -lopencv_objdetect -lopencv_ocl -lopencv_photo -lopencv_stitching -lopencv_superres -lopencv_ts -lopencv_video -lopencv_videostab -lpthread -lm
-
-  IBOOST=-I/usr/local/include
-  LBOOST=-L/usr/local/lib -lboost_regex-mt
-
-  IMYSQLCPPCONN=-I/usr/local/include/
-  LMYSQLCPPCONN=-L/usr/local/lib -l mysqlcppconn
-
-	ICRYPTOPP=-I/opt/local/include/
-  LCRYPTOPP=-L/opt/local/lib -lcryptopp
-
-  IXML=-I/usr/local/include/libxml2
-  LXML=-L/usr/local/lib -lxml2
-
-  DOCUMENT_ROOT=/usr/local/www/apache24/data/
-  CGI_BIN=/usr/local/www/apache24/data/
-
-  IJSON=-I~/tmp/libjson
-  LJSON=-L~/tmp/libjson -ljson
-
-  LNCURSES=-lncurses 
-endif
-
 ifeq ($(OS),DEBIAN)
   COMPILER=g++ -w
   ICGICC=-I/usr/local/include/
@@ -92,6 +65,8 @@ ifeq ($(OS),DEBIAN)
  
   IROOT=-pthread -std=c++11 -m32 -msse -mfpmath=sse -I/usr/local/root/include
   LROOT=-L/usr/local/root/lib -lCore -lImt -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lTreePlayer -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lMultiProc -pthread -lm -ldl -rdynamic 
+
+  LCURL=-lcurl
 
   IBOOST=-I/usr/local/include
   LBOOST=-L/usr/local/lib -lboost_regex-mt
@@ -132,7 +107,7 @@ $(OBJDIR)/LIBStuff: $(EXEC_SRC_DIR)/LIBStuff.cpp \
 	@$(COMPILER) $(EXEC_SRC_DIR)/LIBStuff.cpp  \
 	            $(OBJDIR)/NIST.o              \
 	            $(OBJDIR)/Base.o              \
-              $(INCLUDES) $(LROOT) \
+              $(INCLUDES) $(LROOT) $(LCURL) \
               -o $(BINDIR)/LIBStuff
 
 $(OBJDIR)/NIST.o: $(CLASSES_SRC_DIR)/NIST.cpp \
