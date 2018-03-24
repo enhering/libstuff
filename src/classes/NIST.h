@@ -9,8 +9,11 @@ class NIST {
   public:
     NIST();
     ~NIST();
-    void RetrieveData();
-
+    void RetrieveNISTData();
+    void ConvertNISTData();
+    void ltrim(std::string &);
+    void rtrim(std::string &);
+    
   private:
     CURL     * m_pcCurl;
     CURLcode   m_cRes;
