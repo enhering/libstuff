@@ -1,20 +1,22 @@
-#include <curl/curl.h>
-#include <stdlib.h>
-#include <string.h>
+#ifndef NIST_H__
+  #define NIST_H__
 
-#include "Base.h"
+  #include <curl/curl.h>
+  #include <stdlib.h>
+  #include <string.h>
 
-class NIST {
+  #include "Base.h"
 
-  public:
-    NIST();
-    ~NIST();
-    void RetrieveNISTData();
-    void ConvertNISTData();
-    void ltrim(std::string &);
-    void rtrim(std::string &);
-    
-  private:
-    CURL     * m_pcCurl;
-    CURLcode   m_cRes;
-};
+  class NIST : public Base {
+
+    public:
+      NIST();
+      ~NIST();
+      void RetrieveNISTData();
+      void ConvertNISTData();
+      
+    private:
+      CURL     * m_pcCurl;
+      CURLcode   m_cRes;
+  };
+#endif

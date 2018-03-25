@@ -33,7 +33,7 @@ ifeq ($(OS),MACOS)
   LBOOST=-L/usr/local/Cellar/boost/1.64.0_1/lib/ -lboost_regex-mt
 
   IROOT=-stdlib=libc++ -std=c++11 -m64 -I/Applications/root_v6.12.06/include
-  LROOT=-Wl,-rpath,/Applications/root_v6.12.06/lib -L/Applications/root_v6.12.06/lib -lCore -lImt -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lTreePlayer -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lMultiProc -lpthread -stdlib=libc++ -lm -ldl
+  LROOT=-Wl,-rpath,/Applications/root_v6.12.06/lib -L/Applications/root_v6.12.06/lib -lCore -lImt -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lTreePlayer -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lMultiProc -lpthread -stdlib=libc++ -lm -ldl -lSpectrum
   
   LCURL=-lcurl
 
@@ -64,7 +64,7 @@ ifeq ($(OS),DEBIAN)
   LOPENCV=-L/usr/local/lib -lopencv_dnn -lopencv_ml -lopencv_objdetect -lopencv_shape -lopencv_stitching -lopencv_superres -lopencv_videostab -lopencv_calib3d -lopencv_features2d -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_video -lopencv_photo -lopencv_imgproc -lopencv_flann -lopencv_viz -lopencv_core
  
   IROOT=-pthread -std=c++11 -m32 -msse -mfpmath=sse -I/usr/local/root/include
-  LROOT=-L/usr/local/root/lib -lCore -lImt -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lTreePlayer -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lMultiProc -pthread -lm -ldl -rdynamic 
+  LROOT=-L/usr/local/root/lib -lCore -lImt -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lTreePlayer -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lMultiProc -pthread -lm -ldl -rdynamic -lSpectrum
 
   LCURL=-lcurl
 
@@ -102,12 +102,15 @@ all: $(BINDIR)/LIBStuff   $(CLASSES_SRC_DIR)/BuildNumber.h
 
 $(OBJDIR)/LIBStuff: $(EXEC_SRC_DIR)/LIBStuff.cpp \
 	                  $(EXEC_SRC_DIR)/LIBStuff.h   \
-	                  $(OBJDIR)/NIST.o
+	                  $(OBJDIR)/NIST.o             \
+	                  $(OBJDIR)/LIBS.o
+
 	@echo 'LIBStuff'
 	@$(COMPILER) $(EXEC_SRC_DIR)/LIBStuff.cpp  \
+							$(OBJDIR)/LIBS.o              \
 	            $(OBJDIR)/NIST.o              \
 	            $(OBJDIR)/Base.o              \
-              $(INCLUDES) $(LROOT) $(LCURL) \
+              $(INCLUDES) $(LROOT) $(LCURL) $(LROOT) \
               -o $(BINDIR)/LIBStuff
 
 $(OBJDIR)/NIST.o: $(CLASSES_SRC_DIR)/NIST.cpp \
@@ -116,6 +119,13 @@ $(OBJDIR)/NIST.o: $(CLASSES_SRC_DIR)/NIST.cpp \
 
 	@echo 'NIST.o'
 	@$(COMPILER) -c $(CLASSES_SRC_DIR)/NIST.cpp $(INCLUDES) -o $(OBJDIR)/NIST.o
+
+$(OBJDIR)/LIBS.o: $(CLASSES_SRC_DIR)/LIBS.cpp \
+	                $(CLASSES_SRC_DIR)/LIBS.h   \
+	                $(OBJDIR)/Base.o
+
+	@echo 'LIBS.o'
+	@$(COMPILER) -c $(CLASSES_SRC_DIR)/LIBS.cpp $(INCLUDES) -o $(OBJDIR)/LIBS.o
 
 $(OBJDIR)/Base.o: $(CLASSES_SRC_DIR)/Base.cpp \
 	                $(CLASSES_SRC_DIR)/Base.h 
