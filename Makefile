@@ -26,6 +26,9 @@ ifeq ($(OS),MACOS)
   ICGICC=-I/usr/include
   LCGICC=-L/usr/lib -L/Users/enhering/tmp/cgicc-3.2.12/cgicc/.libs -lcgicc
 
+  IGSL=-I/opt/local/include/
+	LGSL=-L/opt/local/lib -lgsl
+
   IOPENCV=-I/usr/local/include/opencv -I/usr/local/include
   LOPENCV=-L/usr/local/Cellar/opencv/3.4.0_1/lib -lopencv_stitching -lopencv_superres -lopencv_videostab -lopencv_bgsegm -lopencv_bioinspired -lopencv_ccalib -lopencv_dpm -lopencv_face -lopencv_photo -lopencv_fuzzy -lopencv_img_hash -lopencv_line_descriptor -lopencv_optflow -lopencv_reg -lopencv_rgbd -lopencv_saliency -lopencv_stereo -lopencv_structured_light -lopencv_phase_unwrapping -lopencv_surface_matching -lopencv_tracking -lopencv_datasets -lopencv_text -lopencv_dnn -lopencv_plot -lopencv_xfeatures2d -lopencv_shape -lopencv_video -lopencv_ml -lopencv_ximgproc -lopencv_calib3d -lopencv_features2d -lopencv_highgui -lopencv_videoio -lopencv_flann -lopencv_xobjdetect -lopencv_imgcodecs -lopencv_objdetect -lopencv_xphoto -lopencv_imgproc -lopencv_core
 
@@ -59,6 +62,9 @@ ifeq ($(OS),DEBIAN)
   COMPILER=g++ -w
   ICGICC=-I/usr/local/include/
   LCGICC=-L/usr/local/lib -lcgicc
+
+  IGSL=-I/opt/local/include/
+	LGSL=-L/opt/local/lib -lgsl
 
   IOPENCV=-I/usr/local/include/opencv -I/usr/local/include
   LOPENCV=-L/usr/local/lib -lopencv_dnn -lopencv_ml -lopencv_objdetect -lopencv_shape -lopencv_stitching -lopencv_superres -lopencv_videostab -lopencv_calib3d -lopencv_features2d -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_video -lopencv_photo -lopencv_imgproc -lopencv_flann -lopencv_viz -lopencv_core
@@ -107,10 +113,13 @@ $(OBJDIR)/LIBStuff: $(EXEC_SRC_DIR)/LIBStuff.cpp \
 
 	@echo 'LIBStuff'
 	@$(COMPILER) $(EXEC_SRC_DIR)/LIBStuff.cpp  \
-							$(OBJDIR)/LIBS.o              \
-	            $(OBJDIR)/NIST.o              \
-	            $(OBJDIR)/Base.o              \
-              $(INCLUDES) $(LROOT) $(LCURL) $(LROOT) \
+							$(OBJDIR)/LIBS.o               \
+	            $(OBJDIR)/NIST.o               \
+	            $(OBJDIR)/Base.o               \
+	            $(OBJDIR)/Fit.o                \
+              $(OBJDIR)/FitFunctions.o       \
+              $(OBJDIR)/FunctionFit.o        \
+              $(INCLUDES) $(LROOT) $(LCURL) $(LROOT) $(LGSL)\
               -o $(BINDIR)/LIBStuff
 
 $(OBJDIR)/NIST.o: $(CLASSES_SRC_DIR)/NIST.cpp \
@@ -122,10 +131,31 @@ $(OBJDIR)/NIST.o: $(CLASSES_SRC_DIR)/NIST.cpp \
 
 $(OBJDIR)/LIBS.o: $(CLASSES_SRC_DIR)/LIBS.cpp \
 	                $(CLASSES_SRC_DIR)/LIBS.h   \
-	                $(OBJDIR)/Base.o
-
+	                $(OBJDIR)/Fit.o             \
+	                $(OBJDIR)/FitFunctions.o    \
+	                $(OBJDIR)/FunctionFit.o     \
+	                $(OBJDIR)/Base.o            
 	@echo 'LIBS.o'
 	@$(COMPILER) -c $(CLASSES_SRC_DIR)/LIBS.cpp $(INCLUDES) -o $(OBJDIR)/LIBS.o
+
+$(OBJDIR)/Fit.o: $(CLASSES_SRC_DIR)/Fit.cpp \
+	                $(CLASSES_SRC_DIR)/Fit.h   \
+	                $(OBJDIR)/Base.o
+	@echo 'Fit.o'
+	@$(COMPILER) -c $(CLASSES_SRC_DIR)/Fit.cpp $(INCLUDES) -o $(OBJDIR)/Fit.o
+
+$(OBJDIR)/FitFunctions.o: $(CLASSES_SRC_DIR)/FitFunctions.cpp \
+	                $(CLASSES_SRC_DIR)/FitFunctions.h   \
+	                $(OBJDIR)/Base.o
+	@echo 'FitFunctions.o'
+	@$(COMPILER) -c $(CLASSES_SRC_DIR)/FitFunctions.cpp $(INCLUDES) -o $(OBJDIR)/FitFunctions.o
+
+$(OBJDIR)/FunctionFit.o: $(CLASSES_SRC_DIR)/FunctionFit.cpp \
+	                $(CLASSES_SRC_DIR)/FunctionFit.h   \
+	                $(OBJDIR)/Base.o
+	@echo 'FunctionFit.o'
+	@$(COMPILER) -c $(CLASSES_SRC_DIR)/FunctionFit.cpp $(INCLUDES) -o $(OBJDIR)/FunctionFit.o
+
 
 $(OBJDIR)/Base.o: $(CLASSES_SRC_DIR)/Base.cpp \
 	                $(CLASSES_SRC_DIR)/Base.h 
