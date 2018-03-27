@@ -4,11 +4,16 @@
   #include <stdlib.h>
   #include <stdio.h>
 
+  #include <gsl/gsl_matrix.h>
+  #include <gsl/gsl_vector.h>
   #include <gsl/gsl_blas.h>
-  #include <gsl/gsl_multifit_nlin.h>
+  #include <gsl/gsl_multifit_nlinear.h>
+
   #include <cassert>
 
-  class Fit {
+  #include "Base.h"
+
+  class Fit : public Base {
   
     public:
     
@@ -21,9 +26,9 @@
     
       Fit() { };
     
-      void FitData(mglData *, mglData *,
-                  mglData *, double *,
-                  double *, int);
+      void FitData(std::vector<double> *, std::vector<double> *,
+                   std::vector<double> *, double *,
+                   double *, int);
 
     protected:
     

@@ -11,9 +11,9 @@ LIBS::~LIBS() {
 void LIBS::LoadData(std::string strFileName) {
   
   std::string   strLine;
-  std::ifstream InputFile.open(strFileName);
+  std::ifstream InputFile;
 
-  m_nMaxIndex = 0;
+  InputFile.open(strFileName);
 
   if (! InputFile.is_open()) { 
     std::cerr << "Error opening " << strFileName << " for output." << std::endl;
@@ -44,28 +44,8 @@ void LIBS::LoadData(std::string strFileName) {
     fIntensity = std::stof(strCol02);
 
     // pcTomatoHistogram->Fill(fLambda, fIntensity);
-    m_afLIBSData_Lambda.push_back(fLambda);
-    m_afLIBSData_Intensity.push_back(fIntensity);
-    m_nMaxIndex++;
-  }
-}
 
-void LIBS::SetSearchWindow(float fLambdaStart, float fLambdaEnd) {
-  long nIndex = 0;
-  while (nIndex < m_nMaxIndex) {
-    if (m_afLIBSData_Lambda[nIndex] > fLambdaStart) {
-      break;
-    }
-    nIndex++;
+    m_pcDataFit->AddDataPoint(fLambda, fIntensity, 1.0);
   }
-  m_nStartIndex = nIndex;
-
-  while (nIndex < m_nMaxIndex) {
-    if (m_afLIBSData_Lambda[nIndex] > fLambdaEnd) {
-      break;
-    }
-    nIndex++;
-  }
-  m_nEndIndex = nIndex;
 }
 

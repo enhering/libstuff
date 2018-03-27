@@ -1,9 +1,9 @@
 #ifndef BUILD_NUMBER_STR
-#define BUILD_NUMBER_STR "35"
+#define BUILD_NUMBER_STR "38"
 #endif
 #ifndef VERSION_STR
-#define VERSION_STR "0.1.35 - Sun Mar 25 17:30:29 -04 2018"
+#define VERSION_STR "0.1.38 - Tue Mar 27 09:50:11 -04 2018"
 #endif
 #ifndef VERSION_STR_SHORT
-#define VERSION_STR_SHORT "0.1.35"
+#define VERSION_STR_SHORT "0.1.38"
 #endif

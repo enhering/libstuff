@@ -98,28 +98,29 @@ endif
 INCLUDES=-Isrc/classes $(IOPENCV) $(IROOT)
 
 CLASSES=$(CLASSES_SRC_DIR)/Base.h      $(CLASSES_SRC_DIR)/Base.cpp     \
-        $(CLASSES_SRC_DIR)/NIST.h         $(CLASSES_SRC_DIR)/NIST.cpp 
+        $(CLASSES_SRC_DIR)/NIST.h         $(CLASSES_SRC_DIR)/NIST.cpp  \
+        $(CLASSES_SRC_DIR)/LIBS.h         $(CLASSES_SRC_DIR)/LIBS.cpp  \
+        $(CLASSES_SRC_DIR)/DataFit.h      $(CLASSES_SRC_DIR)/DataFit.cpp  \
+
 DESKTOP_EXECUTABLES=$(EXEC_SRC_DIR)/LIBStuff.cpp   $(EXEC_SRC_DIR)/LIBStuff.h
 
 SOURCES=$(CLASSES) $(DESKTOP_EXECUTABLES)
-
 
 all: $(BINDIR)/LIBStuff   $(CLASSES_SRC_DIR)/BuildNumber.h
 
 $(OBJDIR)/LIBStuff: $(EXEC_SRC_DIR)/LIBStuff.cpp \
 	                  $(EXEC_SRC_DIR)/LIBStuff.h   \
 	                  $(OBJDIR)/NIST.o             \
-	                  $(OBJDIR)/LIBS.o
+	                  $(OBJDIR)/LIBS.o             \
+	                  $(OBJDIR)/DataFit.o          
 
 	@echo 'LIBStuff'
 	@$(COMPILER) $(EXEC_SRC_DIR)/LIBStuff.cpp  \
-							$(OBJDIR)/LIBS.o               \
+              $(OBJDIR)/DataFit.o           \
+							$(OBJDIR)/LIBS.o              \
 	            $(OBJDIR)/NIST.o               \
 	            $(OBJDIR)/Base.o               \
-	            $(OBJDIR)/Fit.o                \
-              $(OBJDIR)/FitFunctions.o       \
-              $(OBJDIR)/FunctionFit.o        \
-              $(INCLUDES) $(LROOT) $(LCURL) $(LROOT) $(LGSL)\
+              $(INCLUDES)  $(LCURL)  $(LGSL)\
               -o $(BINDIR)/LIBStuff
 
 $(OBJDIR)/NIST.o: $(CLASSES_SRC_DIR)/NIST.cpp \
@@ -131,34 +132,22 @@ $(OBJDIR)/NIST.o: $(CLASSES_SRC_DIR)/NIST.cpp \
 
 $(OBJDIR)/LIBS.o: $(CLASSES_SRC_DIR)/LIBS.cpp \
 	                $(CLASSES_SRC_DIR)/LIBS.h   \
-	                $(OBJDIR)/Fit.o             \
-	                $(OBJDIR)/FitFunctions.o    \
-	                $(OBJDIR)/FunctionFit.o     \
-	                $(OBJDIR)/Base.o            
+	                $(OBJDIR)/DataFit.o         \
+	                $(OBJDIR)/Base.o           
+
 	@echo 'LIBS.o'
 	@$(COMPILER) -c $(CLASSES_SRC_DIR)/LIBS.cpp $(INCLUDES) -o $(OBJDIR)/LIBS.o
 
-$(OBJDIR)/Fit.o: $(CLASSES_SRC_DIR)/Fit.cpp \
-	                $(CLASSES_SRC_DIR)/Fit.h   \
+$(OBJDIR)/DataFit.o: $(CLASSES_SRC_DIR)/DataFit.cpp \
+	                $(CLASSES_SRC_DIR)/DataFit.h   \
 	                $(OBJDIR)/Base.o
-	@echo 'Fit.o'
-	@$(COMPILER) -c $(CLASSES_SRC_DIR)/Fit.cpp $(INCLUDES) -o $(OBJDIR)/Fit.o
 
-$(OBJDIR)/FitFunctions.o: $(CLASSES_SRC_DIR)/FitFunctions.cpp \
-	                $(CLASSES_SRC_DIR)/FitFunctions.h   \
-	                $(OBJDIR)/Base.o
-	@echo 'FitFunctions.o'
-	@$(COMPILER) -c $(CLASSES_SRC_DIR)/FitFunctions.cpp $(INCLUDES) -o $(OBJDIR)/FitFunctions.o
-
-$(OBJDIR)/FunctionFit.o: $(CLASSES_SRC_DIR)/FunctionFit.cpp \
-	                $(CLASSES_SRC_DIR)/FunctionFit.h   \
-	                $(OBJDIR)/Base.o
-	@echo 'FunctionFit.o'
-	@$(COMPILER) -c $(CLASSES_SRC_DIR)/FunctionFit.cpp $(INCLUDES) -o $(OBJDIR)/FunctionFit.o
-
+	@echo 'DataFit.o'
+	@$(COMPILER) -c $(CLASSES_SRC_DIR)/DataFit.cpp $(INCLUDES) -o $(OBJDIR)/DataFit.o
 
 $(OBJDIR)/Base.o: $(CLASSES_SRC_DIR)/Base.cpp \
 	                $(CLASSES_SRC_DIR)/Base.h 
+
 	@echo 'Base.o'
 	@$(COMPILER) -c $(CLASSES_SRC_DIR)/Base.cpp $(INCLUDES) -o $(OBJDIR)/Base.o
 

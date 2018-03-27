@@ -9,7 +9,14 @@
   // #include "TVirtualFitter.h"
 
   #include <vector>
+
+  #include <gsl/gsl_matrix.h>
+  #include <gsl/gsl_vector.h>
+  #include <gsl/gsl_blas.h>
+  #include <gsl/gsl_multifit_nlinear.h>
+
   #include "Base.h"
+  #include "DataFit.h"
 
   class LIBS : public Base {
     public:
@@ -17,11 +24,10 @@
       ~LIBS();
       
       void LoadData(std::string);
+      void SetSearchWindow(float, float);
 
     private:
-      std::vector<float> m_afLibsData_Lambda;
-      std::vector<float> m_afLibsData_Intensity;
+      DataFit * m_pcDataFit;
 
-      long m_nStartIndex, m_nEndIndex, m_nMaxIndex;
   };
 #endif
