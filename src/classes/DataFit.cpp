@@ -113,6 +113,8 @@ int DataFit::GetNumberOfFunctionParameters() {
 void DataFit::InitializeParameters(std::vector<double> & afP) {
   int nNumberOfFittingParameters = GetNumberOfFunctionParameters();
 
+  m_afInitialParameters.clear();
+
   for (int nI = 0; nI < nNumberOfFittingParameters; nI++) {
     m_afInitialParameters.push_back(afP[nI]);
   }
@@ -143,13 +145,13 @@ int DataFit::F(const gsl_vector * x,
   
   size_t n = ((struct data *)data)->n;
   double *y = ((struct data *)data)->y;
-  double *sigma = ((struct data *) data)->sigma;
+  double *weights = ((struct data *) data)->weights;
 
   for (size_t i = 0; i < n; i++) {
 
     double t = ((struct data *)data)->x[i];
     double Yi = SelectedLaw(x, t);
-    gsl_vector_set (f, i, (Yi - y[i])/sigma[i]);
+    gsl_vector_set (f, i, (Yi - y[i])/weights[i]);
   }
   
   return GSL_SUCCESS;
@@ -160,7 +162,7 @@ int DataFit::DF(const gsl_vector * x,
                 gsl_matrix * J) {
   
   size_t n = ((struct data *)data)->n;
-  double *sigma = ((struct data *) data)->sigma;
+  double *sigma = ((struct data *) data)->weights;
 
   size_t i;
   for (i = 0; i < n; i++) {
@@ -201,6 +203,7 @@ void DataFit::Callback(const size_t iter, void *params, const gsl_multifit_nline
 }
 
 void DataFit::Fit() {
+
   const gsl_multifit_nlinear_type *T = gsl_multifit_nlinear_trust;
 
   gsl_multifit_nlinear_workspace *w;
@@ -235,13 +238,12 @@ void DataFit::Fit() {
   double x_i[n];
   double y[n];
   double weights[n];
-  double sigma[n];
   
   for (long nIndex = 0; nIndex < n; nIndex++) {
     if (m_bWindowSelected) {
-      x_i[nIndex]     = m_afSelectedX[nIndex + m_nStartIndex];
-      y[nIndex]       = m_afSelectedY[nIndex + m_nStartIndex];
-      weights[nIndex] = m_afSelectedYSD[nIndex + m_nStartIndex]; 
+      x_i[nIndex]     = m_afSelectedX[nIndex];
+      y[nIndex]       = m_afSelectedY[nIndex];
+      weights[nIndex] = m_afSelectedYSD[nIndex]; 
     } 
     else {
       x_i[nIndex]     = m_afX[nIndex];
@@ -249,8 +251,22 @@ void DataFit::Fit() {
       weights[nIndex] = m_afYSD[nIndex]; 
     }    
   }
+
+  TCanvas canvas("a", "b", 500, 700, 400, 200);
+  TGraph graph(n, x_i, y);
+  graph.SetTitle("LIBS data");
   
-  struct data d = { n, x_i, y, weights};
+  graph.SetMarkerStyle(2);
+  graph.SetMarkerColor(4);
+  graph.SetMarkerSize(0.3);
+  graph.SetLineColor(4);
+  graph.SetLineWidth(1);
+  graph.GetXaxis()->SetNdivisions(5, kTRUE);
+  graph.Draw("APL");
+  canvas.Update();
+  gSystem->ProcessEvents();
+
+  data d = { n, x_i, y, weights};
 
   // Parameter initialization;
   std::cout << "  Parameter initialization:" << std::endl;
@@ -281,7 +297,7 @@ void DataFit::Fit() {
 
   // Define the function to be minimized
   fdf.f = F;
-  fdf.df = DF;   /* set to NULL for finite-difference Jacobian */
+  fdf.df = NULL;   /* set to NULL for finite-difference Jacobian */
   fdf.fvv = NULL;     /* not using geodesic acceleration */
   fdf.n = n;
   fdf.p = p;
@@ -327,6 +343,8 @@ void DataFit::Fit() {
     double dof = n - p;
     double c = GSL_MAX_DBL(1, sqrt(chisq / dof));
 
+    fprintf(stderr, "chisq = %g\n", chisq);    
+
     fprintf(stderr, "chisq/dof = %g\n", chisq / dof);
 
     fprintf (stderr, "A      = %.5f +/- %.5f\n", FIT(0), c*ERR(0));
@@ -336,8 +354,15 @@ void DataFit::Fit() {
 
   fprintf (stderr, "status = %s\n", gsl_strerror (status));
 
+  m_fChiSqr = chisq;
+  m_fGaussianAmplitude = FIT(0);
+  m_fGaussianCenter    = FIT(1);
+  m_fGaussianWidth     = FIT(2);
+
   gsl_multifit_nlinear_free (w);
   gsl_matrix_free (covar);
+
+  sleep(1);
 }
 
 double DataFit::Gaussian(const gsl_vector * padIndependents, double dX) {

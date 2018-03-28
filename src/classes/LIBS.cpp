@@ -52,10 +52,31 @@ void LIBS::LoadData(std::string strFileName) {
 }
 
 void LIBS::ScanData() {
-  m_pcDataFit->SetSearchWindow(267.0, 267.3);
-  m_pcDataFit->SetFittingFunction(GAUSSIAN);
-  std::vector<double> afParam = { 100.0, 267.0, 0.001 };
-  m_pcDataFit->InitializeParameters(afParam);
-  m_pcDataFit->Fit();
+  double fLambdaSearchStart = 263.8;
+  double fLambdaSearchEnd   = 400.0;
+
+  double fLambdaMinWindowSize = 0.1;
+
+  double fLambdaWindowStart = fLambdaSearchStart;
+  double fLambdaWindowEnd   = fLambdaWindowStart + fLambdaMinWindowSize;
+
+  do {
+    m_pcDataFit->SetSearchWindow(fLambdaWindowStart, fLambdaWindowEnd);
+    m_pcDataFit->SetFittingFunction(GAUSSIAN);
+
+    double fWindowCenter = (fLambdaWindowEnd + fLambdaWindowStart) / 2;
+    std::vector<double> afParam = { 100.0, fWindowCenter, 0.001 };
+    m_pcDataFit->InitializeParameters(afParam);
+    m_pcDataFit->Fit();
+
+    double fAmplitude = m_pcDataFit->GetGaussianAmplitude();
+    double fCenter    = m_pcDataFit->GetGaussianCenter();
+    double fWidth     = m_pcDataFit->GetGaussianWidth();
+    double fChiSqr    = m_pcDataFit->GetChiSqr();
+
+    fLambdaWindowStart = fLambdaWindowEnd;
+    fLambdaWindowEnd += fLambdaMinWindowSize;
+    
+  } while (fLambdaWindowStart < fLambdaSearchEnd);
 }
 

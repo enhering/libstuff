@@ -120,7 +120,7 @@ $(OBJDIR)/LIBStuff: $(EXEC_SRC_DIR)/LIBStuff.cpp \
 							$(OBJDIR)/LIBS.o              \
 	            $(OBJDIR)/NIST.o               \
 	            $(OBJDIR)/Base.o               \
-              $(INCLUDES)  $(LCURL)  $(LGSL)\
+              $(INCLUDES)  $(LCURL)  $(LGSL) $(LROOT) \
               -o $(BINDIR)/LIBStuff
 
 $(OBJDIR)/NIST.o: $(CLASSES_SRC_DIR)/NIST.cpp \

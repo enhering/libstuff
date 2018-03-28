@@ -19,7 +19,7 @@
     size_t n;
     double * x;
     double * y;
-    double * sigma;
+    double * weights;
   };
 
   class DataFit : public Base {
@@ -39,6 +39,12 @@
       static int DF(const gsl_vector *, void *, gsl_matrix *);
       static void Callback(const size_t, void *, const gsl_multifit_nlinear_workspace *);
       void Fit();
+
+      double GetChiSqr()            { return m_fChiSqr; };
+      double GetGaussianCenter()    { return m_fGaussianCenter; };
+      double GetGaussianWidth()     { return m_fGaussianWidth; };
+      double GetGaussianAmplitude() { return m_fGaussianAmplitude; };
+
       static double Gaussian(const gsl_vector *, double);
       static double DGaussianDA(double, double, double, double);
       static double DGaussianDB(double, double, double, double);
@@ -57,14 +63,17 @@
       std::vector<double> m_afParameters;
       bool                m_bParametersIntialized;
 
-      double m_fStdDev;
-
       long m_nStartIndex, m_nEndIndex, m_nMaxIndex;
       bool m_bWindowSelected;
       long m_nSelectedSize;
 
       static FunctionNames m_eSelectedFittingFunction;
       uint8_t              m_nNumberOfFittingParameters;
+
+      double m_fChiSqr;
+      double m_fGaussianCenter;
+      double m_fGaussianWidth;
+      double m_fGaussianAmplitude;
   };
 
 #endif

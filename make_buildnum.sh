@@ -14,7 +14,7 @@ echo "#define BUILD_NUMBER_STR \"`sed  's/^ *//' build.number`\"" >> src/classes
 echo "#endif" >> src/classes/BuildNumber.h
 
 echo "#ifndef VERSION_STR" >> src/classes/BuildNumber.h
-echo "#define VERSION_STR \"$version`sed  's/^ *//' build.number` - `date`\"" >> src/classes/BuildNumber.h
+echo "#define VERSION_STR \"Version $version`sed  's/^ *//' build.number` - `date`\"" >> src/classes/BuildNumber.h
 echo "#endif" >> src/classes/BuildNumber.h
 
 echo "#ifndef VERSION_STR_SHORT" >> src/classes/BuildNumber.h
