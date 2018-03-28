@@ -2,6 +2,7 @@
   #define DATAFIT_H__
 
   #include <vector>
+  #include <math.h>
 
   #include <gsl/gsl_matrix.h>
   #include <gsl/gsl_vector.h>
@@ -11,14 +12,14 @@
   #include "Base.h"
   
   enum FunctionNames {
-    POWERLAW_AND_GAUSSIAN,
-    POWERLAW,
-    POWERLAW2,
-    POWERLAW_AND_SPECIFIC_HEAT_JUMP,
-    SPECIFIC_HEAT_JUMP,
-    TRANSITION,
-    GAUSSIAN,
-    GAP
+    GAUSSIAN
+  };
+
+  struct data {
+    size_t n;
+    double * x;
+    double * y;
+    double * sigma;
   };
 
   class DataFit : public Base {
@@ -30,8 +31,18 @@
       void SetSearchWindow(double, double);
       void ClearSearchWindow();
       void SetFittingFunction(FunctionNames);
-      void GetNumberOfFunctionParameters();
+      int  GetNumberOfFunctionParameters();
+      void InitializeParameters(std::vector<double> &);
+
+      static double SelectedLaw(const gsl_vector *, double);
+      static int F (const gsl_vector *, void *, gsl_vector *);
+      static int DF(const gsl_vector *, void *, gsl_matrix *);
+      static void Callback(const size_t, void *, const gsl_multifit_nlinear_workspace *);
       void Fit();
+      static double Gaussian(const gsl_vector *, double);
+      static double DGaussianDA(double, double, double, double);
+      static double DGaussianDB(double, double, double, double);
+      static double DGaussianDC(double, double, double, double);
 
     private:
       std::vector<double> m_afX;
@@ -44,6 +55,7 @@
 
       std::vector<double> m_afInitialParameters;
       std::vector<double> m_afParameters;
+      bool                m_bParametersIntialized;
 
       double m_fStdDev;
 
@@ -51,8 +63,8 @@
       bool m_bWindowSelected;
       long m_nSelectedSize;
 
-      FunctionNames m_eSelectedFittingFunction;
-      uint8_t       m_nNumberOfFittingParameters;
+      static FunctionNames m_eSelectedFittingFunction;
+      uint8_t              m_nNumberOfFittingParameters;
   };
 
 #endif

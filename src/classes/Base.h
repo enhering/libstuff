@@ -6,6 +6,8 @@
   #include <fstream>
   #include <vector>
 
+  #include "BuildNumber.h"
+
   class Base {
     public: 
       Base();

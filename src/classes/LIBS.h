@@ -25,7 +25,7 @@
       
       void LoadData(std::string);
       void SetSearchWindow(float, float);
-
+      void ScanData();
     private:
       DataFit * m_pcDataFit;
 

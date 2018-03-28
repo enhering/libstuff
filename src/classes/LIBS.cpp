@@ -1,7 +1,7 @@
 #include "LIBS.h"
 
 LIBS::LIBS() {
-
+  m_pcDataFit = new DataFit();
 }
 
 LIBS::~LIBS() {
@@ -12,6 +12,8 @@ void LIBS::LoadData(std::string strFileName) {
   
   std::string   strLine;
   std::ifstream InputFile;
+
+  std::cout << "Input data file is: " << strFileName << std::endl;
 
   InputFile.open(strFileName);
 
@@ -47,5 +49,13 @@ void LIBS::LoadData(std::string strFileName) {
 
     m_pcDataFit->AddDataPoint(fLambda, fIntensity, 1.0);
   }
+}
+
+void LIBS::ScanData() {
+  m_pcDataFit->SetSearchWindow(267.0, 267.3);
+  m_pcDataFit->SetFittingFunction(GAUSSIAN);
+  std::vector<double> afParam = { 100.0, 267.0, 0.001 };
+  m_pcDataFit->InitializeParameters(afParam);
+  m_pcDataFit->Fit();
 }
 
