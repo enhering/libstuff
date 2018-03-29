@@ -193,13 +193,13 @@ void DataFit::Callback(const size_t iter, void *params, const gsl_multifit_nline
   /* compute reciprocal condition number of J(x) */
   gsl_multifit_nlinear_rcond(&rcond, w);
 
-  fprintf(stderr, "iter %2zu: A = %.4f, lambda = %.4f, b = %.4f, cond(J) = %8.4f, |f(x)| = %.4f\n",
-          iter,
-          gsl_vector_get(x, 0),
-          gsl_vector_get(x, 1),
-          gsl_vector_get(x, 2),
-          1.0 / rcond,
-          gsl_blas_dnrm2(f));
+  // fprintf(stderr, "iter %2zu: A = %.4f, lambda = %.4f, b = %.4f, cond(J) = %8.4f, |f(x)| = %.4f\n",
+  //         iter,
+  //         gsl_vector_get(x, 0),
+  //         gsl_vector_get(x, 1),
+  //         gsl_vector_get(x, 2),
+  //         1.0 / rcond,
+  //         gsl_blas_dnrm2(f));
 }
 
 void DataFit::Fit() {
@@ -253,18 +253,24 @@ void DataFit::Fit() {
   }
 
   TCanvas canvas("a", "b", 500, 700, 400, 200);
-  TGraph graph(n, x_i, y);
-  graph.SetTitle("LIBS data");
+
+  TMultiGraph *mg = new TMultiGraph();
+
+  TGraph * graph = new TGraph(n, x_i, y);
+  graph->SetTitle("LIBS data");
   
-  graph.SetMarkerStyle(2);
-  graph.SetMarkerColor(4);
-  graph.SetMarkerSize(0.3);
-  graph.SetLineColor(4);
-  graph.SetLineWidth(1);
-  graph.GetXaxis()->SetNdivisions(5, kTRUE);
-  graph.Draw("APL");
-  canvas.Update();
-  gSystem->ProcessEvents();
+  graph->SetMarkerStyle(2);
+  graph->SetMarkerColor(4);
+  graph->SetMarkerSize(0.3);
+  graph->SetLineColor(4);
+  graph->SetLineWidth(1);
+  graph->GetXaxis()->SetNdivisions(5, kTRUE);
+
+  mg->Add(graph, "APL");
+
+  // graph.Draw("APL");
+  // canvas.Update();
+  // gSystem->ProcessEvents();
 
   data d = { n, x_i, y, weights};
 
@@ -327,30 +333,30 @@ void DataFit::Fit() {
 #define FIT(i) gsl_vector_get(w->x, i)
 #define ERR(i) sqrt(gsl_matrix_get(covar,i,i))
 
-  fprintf(stderr, "summary from method '%s/%s'\n",
-          gsl_multifit_nlinear_name(w),
-          gsl_multifit_nlinear_trs_name(w));
-  fprintf(stderr, "number of iterations: %zu\n",
-          gsl_multifit_nlinear_niter(w));
-  fprintf(stderr, "function evaluations: %zu\n", fdf.nevalf);
-  fprintf(stderr, "Jacobian evaluations: %zu\n", fdf.nevaldf);
-  fprintf(stderr, "reason for stopping: %s\n",
-          (info == 1) ? "small step size" : "small gradient");
-  fprintf(stderr, "initial |f(x)| = %f\n", sqrt(chisq0));
-  fprintf(stderr, "final   |f(x)| = %f\n", sqrt(chisq));
+  // fprintf(stderr, "summary from method '%s/%s'\n",
+  //         gsl_multifit_nlinear_name(w),
+  //         gsl_multifit_nlinear_trs_name(w));
+  // fprintf(stderr, "number of iterations: %zu\n",
+  //         gsl_multifit_nlinear_niter(w));
+  // fprintf(stderr, "function evaluations: %zu\n", fdf.nevalf);
+  // fprintf(stderr, "Jacobian evaluations: %zu\n", fdf.nevaldf);
+  // fprintf(stderr, "reason for stopping: %s\n",
+  //         (info == 1) ? "small step size" : "small gradient");
+  // fprintf(stderr, "initial |f(x)| = %f\n", sqrt(chisq0));
+  // fprintf(stderr, "final   |f(x)| = %f\n", sqrt(chisq));
 
-  {
-    double dof = n - p;
-    double c = GSL_MAX_DBL(1, sqrt(chisq / dof));
+  // {
+  //   double dof = n - p;
+  //   double c = GSL_MAX_DBL(1, sqrt(chisq / dof));
 
-    fprintf(stderr, "chisq = %g\n", chisq);    
+  //   fprintf(stderr, "chisq = %g\n", chisq);    
 
-    fprintf(stderr, "chisq/dof = %g\n", chisq / dof);
+  //   fprintf(stderr, "chisq/dof = %g\n", chisq / dof);
 
-    fprintf (stderr, "A      = %.5f +/- %.5f\n", FIT(0), c*ERR(0));
-    fprintf (stderr, "lambda = %.5f +/- %.5f\n", FIT(1), c*ERR(1));
-    fprintf (stderr, "b      = %.5f +/- %.5f\n", FIT(2), c*ERR(2));
-  }
+  //   fprintf (stderr, "A      = %.5f +/- %.5f\n", FIT(0), c*ERR(0));
+  //   fprintf (stderr, "lambda = %.5f +/- %.5f\n", FIT(1), c*ERR(1));
+  //   fprintf (stderr, "b      = %.5f +/- %.5f\n", FIT(2), c*ERR(2));
+  // }
 
   fprintf (stderr, "status = %s\n", gsl_strerror (status));
 
@@ -358,6 +364,21 @@ void DataFit::Fit() {
   m_fGaussianAmplitude = FIT(0);
   m_fGaussianCenter    = FIT(1);
   m_fGaussianWidth     = FIT(2);
+  m_nFitStatus = status;
+  
+  // double fXStart = x_i[0];
+  // double fXEnd   = x_i[n-1];
+
+  for (long nIndex = 0; nIndex < n; nIndex++) {
+    y[nIndex] = m_fGaussianAmplitude * exp(-1*((pow((x_i[nIndex]-m_fGaussianCenter),2))/(2*m_fGaussianWidth *m_fGaussianWidth)));
+  } 
+  TGraph * graph2 = new TGraph(n, x_i, y);
+
+  mg->Add(graph2, "cp");
+  mg->Draw("a");
+
+  canvas.Update();
+  gSystem->ProcessEvents();
 
   gsl_multifit_nlinear_free (w);
   gsl_matrix_free (covar);

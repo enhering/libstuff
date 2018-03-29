@@ -9,6 +9,7 @@
   #include "TCanvas.h"
   #include "TROOT.h"
   #include "TGraph.h"
+  #include "TMultiGraph.h"
   #include "TF1.h"
   #include "TLegend.h"
   #include "TArrow.h"

@@ -44,6 +44,7 @@
       double GetGaussianCenter()    { return m_fGaussianCenter; };
       double GetGaussianWidth()     { return m_fGaussianWidth; };
       double GetGaussianAmplitude() { return m_fGaussianAmplitude; };
+      int    GetFitStatus()         { return m_nFitStatus; }; 
 
       static double Gaussian(const gsl_vector *, double);
       static double DGaussianDA(double, double, double, double);
@@ -74,6 +75,7 @@
       double m_fGaussianCenter;
       double m_fGaussianWidth;
       double m_fGaussianAmplitude;
+      int    m_nFitStatus;
   };
 
 #endif

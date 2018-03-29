@@ -55,7 +55,7 @@ void LIBS::ScanData() {
   double fLambdaSearchStart = 263.8;
   double fLambdaSearchEnd   = 400.0;
 
-  double fLambdaMinWindowSize = 0.1;
+  double fLambdaMinWindowSize = 0.2;
 
   double fLambdaWindowStart = fLambdaSearchStart;
   double fLambdaWindowEnd   = fLambdaWindowStart + fLambdaMinWindowSize;
@@ -73,6 +73,11 @@ void LIBS::ScanData() {
     double fCenter    = m_pcDataFit->GetGaussianCenter();
     double fWidth     = m_pcDataFit->GetGaussianWidth();
     double fChiSqr    = m_pcDataFit->GetChiSqr();
+    int    nStatus    = m_pcDataFit->GetFitStatus();
+
+    if (nStatus == GSL_SUCCESS) {
+
+    }
 
     fLambdaWindowStart = fLambdaWindowEnd;
     fLambdaWindowEnd += fLambdaMinWindowSize;
