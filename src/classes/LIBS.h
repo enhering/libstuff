@@ -16,18 +16,22 @@
   #include <gsl/gsl_multifit_nlinear.h>
 
   #include "Base.h"
+  #include "NIST.h"
   #include "DataFit.h"
 
   class LIBS : public Base {
     public:
       LIBS();
       ~LIBS();
+
+      void SetNISTObjectPointer(NIST * pcNIST) { m_pcNIST = pcNIST; };
       
       void LoadData(std::string);
       void SetSearchWindow(float, float);
       void ScanData();
     private:
       DataFit * m_pcDataFit;
+      NIST    * m_pcNIST;
 
   };
 #endif

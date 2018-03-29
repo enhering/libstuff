@@ -3,6 +3,6 @@
 #include "TApplication.h"
 
 
-NIST g_cNIST;
-LIBS g_cLIBS;
+NIST * g_pcNIST;
+LIBS * g_pcLIBS;
 
