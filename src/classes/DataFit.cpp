@@ -53,9 +53,9 @@ void DataFit::SetSearchWindow(double fXStart, double fXEnd) {
   }
   m_nEndIndex = nIndex;
 
-  // if ((m_nEndIndex - m_nStartIndex) < m_nNumberOfFittingParameters) {
-  //   m_nEndIndex = m_nStartIndex + m_nNumberOfFittingParameters;
-  // }
+  if ((m_nEndIndex - m_nStartIndex) < m_nNumberOfFittingParameters) {
+    m_nEndIndex = m_nStartIndex + m_nNumberOfFittingParameters;
+  }
 
   std::cout << m_nMaxIndex << " datapoints added. " << std::endl
             << "Search window between " << fXStart << "nm and " << fXEnd << "nm." << std::endl

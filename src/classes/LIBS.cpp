@@ -52,7 +52,7 @@ void LIBS::LoadData(std::string strFileName) {
 }
 
 void LIBS::ScanData(std::string strElement) {
-  double fLambdaSearchStart = 263.8;
+  double fLambdaSearchStart = 263.0;
   double fLambdaSearchEnd   = 400.0;
 
   double fLambdaMinWindowSize = 0.2;
@@ -64,12 +64,12 @@ void LIBS::ScanData(std::string strElement) {
   double fNISTLambda = 0;
 
   while (fNISTLambda < fLambdaWindowStart) {
-    fNISTLambda = m_pcNIST->m_asNISTDataByElement[strElement]->fObservedWavelength_nm[nNISTIndex];
+    fNISTLambda = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex];
     nNISTIndex++;
   }
 
   // Find next NIST line 
-  double fNISTNextLambda = m_pcNIST->m_asNISTDataByElement[strElement]->fObservedWavelength_nm[nNISTIndex+1];
+  double fNISTNextLambda = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex+1];
 
 
   // Try to guess window size
@@ -98,8 +98,8 @@ void LIBS::ScanData(std::string strElement) {
     fLambdaWindowStart = fLambdaWindowEnd;
 
     nNISTIndex++;
-    fNISTLambda     = m_pcNIST->m_asNISTDataByElement[strElement]->fObservedWavelength_nm[nNISTIndex];
-    fNISTNextLambda = m_pcNIST->m_asNISTDataByElement[strElement]->fObservedWavelength_nm[nNISTIndex+1];
+    fNISTLambda     = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex];
+    fNISTNextLambda = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex+1];
     fLambdaWindowEnd = (fNISTNextLambda + fNISTLambda) / 2;
     
   } while (fLambdaWindowStart < fLambdaSearchEnd);

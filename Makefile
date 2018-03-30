@@ -97,8 +97,9 @@ endif
 
 INCLUDES=-Isrc/classes $(IOPENCV) $(IROOT)
 
-CLASSES=$(CLASSES_SRC_DIR)/Base.h      $(CLASSES_SRC_DIR)/Base.cpp     \
+CLASSES=$(CLASSES_SRC_DIR)/Base.h         $(CLASSES_SRC_DIR)/Base.cpp     \
         $(CLASSES_SRC_DIR)/NIST.h         $(CLASSES_SRC_DIR)/NIST.cpp  \
+        $(CLASSES_SRC_DIR)/NISTData.h     $(CLASSES_SRC_DIR)/NISTData.cpp  \
         $(CLASSES_SRC_DIR)/LIBS.h         $(CLASSES_SRC_DIR)/LIBS.cpp  \
         $(CLASSES_SRC_DIR)/DataFit.h      $(CLASSES_SRC_DIR)/DataFit.cpp  \
 
@@ -108,27 +109,37 @@ SOURCES=$(CLASSES) $(DESKTOP_EXECUTABLES)
 
 all: $(BINDIR)/LIBStuff   $(CLASSES_SRC_DIR)/BuildNumber.h
 
-$(OBJDIR)/LIBStuff: $(EXEC_SRC_DIR)/LIBStuff.cpp \
-	                  $(EXEC_SRC_DIR)/LIBStuff.h   \
-	                  $(OBJDIR)/NIST.o             \
-	                  $(OBJDIR)/LIBS.o             \
+$(OBJDIR)/LIBStuff: $(EXEC_SRC_DIR)/LIBStuff.cpp  \
+	                  $(EXEC_SRC_DIR)/LIBStuff.h    \
+	                  $(OBJDIR)/NIST.o              \
+	                  $(OBJDIR)/NISTData.o          \
+	                  $(OBJDIR)/LIBS.o              \
 	                  $(OBJDIR)/DataFit.o          
 
 	@echo 'LIBStuff'
 	@$(COMPILER) $(EXEC_SRC_DIR)/LIBStuff.cpp  \
-              $(OBJDIR)/DataFit.o           \
-							$(OBJDIR)/LIBS.o              \
+              $(OBJDIR)/DataFit.o            \
+							$(OBJDIR)/LIBS.o               \
 	            $(OBJDIR)/NIST.o               \
+	            $(OBJDIR)/NISTData.o           \
 	            $(OBJDIR)/Base.o               \
               $(INCLUDES)  $(LCURL)  $(LGSL) $(LROOT) \
               -o $(BINDIR)/LIBStuff
 
 $(OBJDIR)/NIST.o: $(CLASSES_SRC_DIR)/NIST.cpp \
 	                $(CLASSES_SRC_DIR)/NIST.h   \
+	                $(OBJDIR)/NISTData.o \
 	                $(OBJDIR)/Base.o
 
 	@echo 'NIST.o'
 	@$(COMPILER) -c $(CLASSES_SRC_DIR)/NIST.cpp $(INCLUDES) -o $(OBJDIR)/NIST.o
+
+$(OBJDIR)/NISTData.o: $(CLASSES_SRC_DIR)/NISTData.cpp \
+	                $(CLASSES_SRC_DIR)/NISTData.h   \
+	                $(OBJDIR)/Base.o
+
+	@echo 'NISTData.o'
+	@$(COMPILER) -c $(CLASSES_SRC_DIR)/NISTData.cpp $(INCLUDES) -o $(OBJDIR)/NISTData.o
 
 $(OBJDIR)/LIBS.o: $(CLASSES_SRC_DIR)/LIBS.cpp \
 	                $(CLASSES_SRC_DIR)/LIBS.h   \

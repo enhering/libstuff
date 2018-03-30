@@ -8,26 +8,8 @@
   #include <unordered_map>
 
   #include "Base.h"
-
-  struct NISTData {
-    long nNumLines;
-
-    std::vector<float> fObservedWavelength_nm;
-    std::vector<float> fRitzWavelength_nm;
-    std::vector<float> fUncertainty_nm;
-    std::vector<std::string> strRelInt;
-    std::vector<float> fAki_sec_minus_one;
-    std::vector<std::string> strAcc;
-    std::vector<float> fEi_eV;
-    std::vector<float> fEf_eV;
-    std::vector<std::string> strLowerLevelConf;
-    std::vector<std::string> strLowerLevelTerm;
-    std::vector<std::string> strLowerLevelJ;
-    std::vector<std::string> strUpperLevelConf;
-    std::vector<std::string> strUpperLevelTerm;
-    std::vector<std::string> strUpperLevelJ;
-  };
-
+  #include "NISTData.h"
+  
   class NIST : public Base {
 
     public:
@@ -36,7 +18,7 @@
       void RetrieveNISTData();
       void ConvertAndLoadNISTData();
 
-      std::unordered_map<std::string, NISTData *> m_asNISTDataByElement;
+      std::unordered_map<std::string, NISTData> m_acNISTDataByElement;
       
     private:
       CURL     * m_pcCurl;

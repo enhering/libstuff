@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
   g_pcLIBS = new LIBS();
   g_pcLIBS->SetNISTObjectPointer(g_pcNIST);
   g_pcLIBS->LoadData("data/aW_2_6_micro_segundos_vis_57_mJ.txt");
-  g_pcLIBS->ScanData("W I");
+  g_pcLIBS->ScanData("W");
 
   app.Run();
 }
