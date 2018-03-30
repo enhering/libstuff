@@ -28,7 +28,7 @@
       
       void LoadData(std::string);
       void SetSearchWindow(float, float);
-      void ScanData();
+      void ScanData(std::string);
     private:
       DataFit * m_pcDataFit;
       NIST    * m_pcNIST;

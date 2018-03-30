@@ -51,21 +51,37 @@ void LIBS::LoadData(std::string strFileName) {
   }
 }
 
-void LIBS::ScanData() {
+void LIBS::ScanData(std::string strElement) {
   double fLambdaSearchStart = 263.8;
   double fLambdaSearchEnd   = 400.0;
 
   double fLambdaMinWindowSize = 0.2;
 
   double fLambdaWindowStart = fLambdaSearchStart;
-  double fLambdaWindowEnd   = fLambdaWindowStart + fLambdaMinWindowSize;
+
+  // Search NIST data for first line after window start
+  long nNISTIndex = 0;
+  double fNISTLambda = 0;
+
+  while (fNISTLambda < fLambdaWindowStart) {
+    fNISTLambda = m_pcNIST->m_asNISTDataByElement[strElement]->fObservedWavelength_nm[nNISTIndex];
+    nNISTIndex++;
+  }
+
+  // Find next NIST line 
+  double fNISTNextLambda = m_pcNIST->m_asNISTDataByElement[strElement]->fObservedWavelength_nm[nNISTIndex+1];
+
+
+  // Try to guess window size
+  double fLambdaWindowEnd = (fNISTNextLambda + fNISTLambda) / 2;
 
   do {
+
     m_pcDataFit->SetSearchWindow(fLambdaWindowStart, fLambdaWindowEnd);
     m_pcDataFit->SetFittingFunction(GAUSSIAN);
 
     double fWindowCenter = (fLambdaWindowEnd + fLambdaWindowStart) / 2;
-    std::vector<double> afParam = { 100.0, fWindowCenter, 0.001 };
+    std::vector<double> afParam = { 100.0, fNISTLambda, 0.001 };
     m_pcDataFit->InitializeParameters(afParam);
     m_pcDataFit->Fit();
 
@@ -80,7 +96,11 @@ void LIBS::ScanData() {
     }
 
     fLambdaWindowStart = fLambdaWindowEnd;
-    fLambdaWindowEnd += fLambdaMinWindowSize;
+
+    nNISTIndex++;
+    fNISTLambda     = m_pcNIST->m_asNISTDataByElement[strElement]->fObservedWavelength_nm[nNISTIndex];
+    fNISTNextLambda = m_pcNIST->m_asNISTDataByElement[strElement]->fObservedWavelength_nm[nNISTIndex+1];
+    fLambdaWindowEnd = (fNISTNextLambda + fNISTLambda) / 2;
     
   } while (fLambdaWindowStart < fLambdaSearchEnd);
 }

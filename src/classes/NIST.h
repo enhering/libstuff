@@ -35,12 +35,12 @@
       ~NIST();
       void RetrieveNISTData();
       void ConvertAndLoadNISTData();
+
+      std::unordered_map<std::string, NISTData *> m_asNISTDataByElement;
       
     private:
       CURL     * m_pcCurl;
       CURLcode   m_cRes;
-
-      std::unordered_map<std::string, NISTData> m_NISTDataByElement;
 
   };
 #endif

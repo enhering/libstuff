@@ -71,10 +71,11 @@ void NIST::ConvertAndLoadNISTData() {
 
   bool    bIsDataLine = false;
 
-  NISTData cNISTData;
+  NISTData * pcNISTData = new NISTData();
   long     nLineCounter = 0;
 
   double fValue;
+  std::string strElement;
 
   while (getline (NISTDataFile, strLine)) {
     std::size_t nFound = strLine.find(strStartPattern);
@@ -102,30 +103,36 @@ void NIST::ConvertAndLoadNISTData() {
           (strLine[1]      != 'p')) { 
 
         std::size_t nPos1, nPos2; 
-        std::string strCol01,  strCol02,  strCol03, strCol04, strCol05, strCol06, strCol07, 
+        std::string strCol01A, strCol01B, strCol02,  strCol03, strCol04, strCol05, strCol06, strCol07, 
                     strCol08A, strCol08B, strCol09, strCol10, strCol11, strCol12, strCol13, 
                     strCol14,  strCol15,  strCol16, strCol17;
         std::string strSeparator = "|";
 
         nPos1 = 0;
-        nPos2 = strLine.find(strSeparator, 0);
-        strCol01 = strLine.substr(0, nPos2 - nPos1);
-        ltrim(strCol01); rtrim(strCol01);
-        
-        std::cout << nLineCounter << ": ";
+        nPos2 = strLine.find(" ", 0);
+        strCol01A = strLine.substr(0, nPos2 - nPos1);
+        ltrim(strCol01A); rtrim(strCol01A);
+        strElement = strCol01A;
 
-        std::cout << " 01: " << strCol01;
+        nPos1 = nPos2;
+        nPos2 = strLine.find(strSeparator, nPos1 + 1);
+        strCol01B = strLine.substr(0, nPos2 - nPos1);
+        ltrim(strCol01B); rtrim(strCol01B);
+        
+        // std::cout << nLineCounter << ": ";
+
+        // std::cout << " 01: " << strCol01;
 
         nPos1 = nPos2;
         nPos2 = strLine.find(strSeparator, nPos1 + 1);
         strCol02 = strLine.substr(nPos1 + 1, nPos2 - nPos1 - 1);
         ltrim(strCol02); rtrim(strCol02);
 
-        std::cout << " 02: " << strCol02;
+        // std::cout << " 02: " << strCol02;
         fValue = 0.0;
         if (! strCol02.empty()) {
           fValue = stof(strCol02);
-          m_NISTDataByElement[strCol01].fObservedWavelength_nm.push_back(fValue);
+          pcNISTData->fObservedWavelength_nm.push_back(fValue);
         }
 
         nPos1 = nPos2;
@@ -133,11 +140,11 @@ void NIST::ConvertAndLoadNISTData() {
         strCol03 = strLine.substr(nPos1 + 1, nPos2 - nPos1 - 1);
         ltrim(strCol03); rtrim(strCol03);
 
-        std::cout << " 03: " << strCol03;
+        // std::cout << " 03: " << strCol03;
         fValue = 0.0;
         if (! strCol03.empty()) {
           fValue = stof(strCol03);
-          m_NISTDataByElement[strCol01].fRitzWavelength_nm.push_back(fValue);
+          pcNISTData->fRitzWavelength_nm.push_back(fValue);
         }
         
         nPos1 = nPos2;
@@ -145,11 +152,11 @@ void NIST::ConvertAndLoadNISTData() {
         strCol04 = strLine.substr(nPos1 + 1, nPos2 - nPos1 - 1);
         ltrim(strCol04); rtrim(strCol04);
 
-        std::cout << " 04: " << strCol04;
+        // std::cout << " 04: " << strCol04;
         fValue = 0.0;
         if (! strCol04.empty()) {
           fValue = stof(strCol04);
-          m_NISTDataByElement[strCol01].fUncertainty_nm.push_back(fValue);
+          pcNISTData->fUncertainty_nm.push_back(fValue);
         }
 
         nPos1 = nPos2;
@@ -157,19 +164,19 @@ void NIST::ConvertAndLoadNISTData() {
         strCol05 = strLine.substr(nPos1 + 1, nPos2 - nPos1 - 1);
         ltrim(strCol05); rtrim(strCol05);
 
-        std::cout << " 05: " << strCol05;
-        m_NISTDataByElement[strCol01].strRelInt.push_back(strCol05);
+        // std::cout << " 05: " << strCol05;
+        pcNISTData->strRelInt.push_back(strCol05);
 
         nPos1 = nPos2;
         nPos2 = strLine.find(strSeparator, nPos1 + 1);
         strCol06 = strLine.substr(nPos1 + 1, nPos2 - nPos1 - 1);
         ltrim(strCol06); rtrim(strCol06);
 
-        std::cout << " 06: " << strCol06;
+        // std::cout << " 06: " << strCol06;
         fValue = 0.0;
         if (! strCol06.empty()) {
           fValue = stof(strCol06);
-          m_NISTDataByElement[strCol01].fAki_sec_minus_one.push_back(fValue);
+          pcNISTData->fAki_sec_minus_one.push_back(fValue);
         }
 
         nPos1 = nPos2;
@@ -177,31 +184,37 @@ void NIST::ConvertAndLoadNISTData() {
         strCol07 = strLine.substr(nPos1 + 1, nPos2 - nPos1 - 1);
         ltrim(strCol07); rtrim(strCol07);
 
-        std::cout << " 07: " << strCol07;
-        m_NISTDataByElement[strCol01].strAcc.push_back(strCol07);
+        // std::cout << " 07: " << strCol07;
+        pcNISTData->strAcc.push_back(strCol07);
 
         nPos1 = nPos2;
         nPos2 = strLine.find("-", nPos1 + 1);
-        strCol08A = strLine.substr(nPos1 + 1, nPos2 - nPos1 - 1);
-        ltrim(strCol08A); rtrim(strCol08A);
+        if (nPos2 != std::string::npos) {
+          strCol08A = strLine.substr(nPos1 + 1, nPos2 - nPos1 - 1);
+          ltrim(strCol08A); rtrim(strCol08A);
+        }
+        else {
+          strCol08A = "0";
+          nPos2 = nPos1;
+        }
 
-        std::cout << " 08A: " << strCol08A;
+        // std::cout << " 08A: " << strCol08A;
         fValue = 0.0;
         if (! strCol08A.empty()) {
           fValue = stof(strCol08A);
-          m_NISTDataByElement[strCol01].fEi_eV.push_back(fValue);
+          pcNISTData->fEi_eV.push_back(fValue);
         }
 
         nPos1 = nPos2;
-        nPos2 = strLine.find(strSeparator, nPos1 + 1);
+        nPos2 = strLine.find(strSeparator, nPos1 + 1);    
         strCol08B = strLine.substr(nPos1 + 1, nPos2 - nPos1 - 1);
         ltrim(strCol08B); rtrim(strCol08B);
 
-        std::cout << " 08B: " << strCol08B;
+        // std::cout << " 08B: " << strCol08B;
         fValue = 0.0;
         if (! strCol08B.empty()) {
           fValue = stof(strCol08B);
-          m_NISTDataByElement[strCol01].fEf_eV.push_back(fValue);
+          pcNISTData->fEf_eV.push_back(fValue);
         }
 
         nPos1 = nPos2;
@@ -209,48 +222,48 @@ void NIST::ConvertAndLoadNISTData() {
         strCol09 = strLine.substr(nPos1 + 1, nPos2 - nPos1 - 1);
         ltrim(strCol09); rtrim(strCol09);
 
-        std::cout << " 09: " << strCol09;
-        m_NISTDataByElement[strCol01].strLowerLevelConf.push_back(strCol09);
+        // std::cout << " 09: " << strCol09;
+        pcNISTData->strLowerLevelConf.push_back(strCol09);
 
         nPos1 = nPos2;
         nPos2 = strLine.find(strSeparator, nPos1 + 1);
         strCol10 = strLine.substr(nPos1 + 1, nPos2 - nPos1 - 1);
         ltrim(strCol10); rtrim(strCol10);
 
-        std::cout << " 10: " << strCol10;
-        m_NISTDataByElement[strCol01].strLowerLevelTerm.push_back(strCol10);
+        // std::cout << " 10: " << strCol10;
+        pcNISTData->strLowerLevelTerm.push_back(strCol10);
 
         nPos1 = nPos2;
         nPos2 = strLine.find(strSeparator, nPos1 + 1);
         strCol11 = strLine.substr(nPos1 + 1, nPos2 - nPos1 - 1);
         ltrim(strCol11); rtrim(strCol11);
 
-        std::cout << " 11: " << strCol11;
-        m_NISTDataByElement[strCol01].strLowerLevelJ.push_back(strCol11);
+        // std::cout << " 11: " << strCol11;
+        pcNISTData->strLowerLevelJ.push_back(strCol11);
 
         nPos1 = nPos2;
         nPos2 = strLine.find(strSeparator, nPos1 + 1);
         strCol12 = strLine.substr(nPos1 + 1, nPos2 - nPos1 - 1);
         ltrim(strCol12); rtrim(strCol12);
 
-        std::cout << " 12: " << strCol12;
-        m_NISTDataByElement[strCol01].strUpperLevelConf.push_back(strCol12);
+        // std::cout << " 12: " << strCol12;
+        pcNISTData->strUpperLevelConf.push_back(strCol12);
 
         nPos1 = nPos2;
         nPos2 = strLine.find(strSeparator, nPos1 + 1);
         strCol13 = strLine.substr(nPos1 + 1, nPos2 - nPos1 - 1);
         ltrim(strCol13); rtrim(strCol13);
 
-        std::cout << " 13: " << strCol13;
-        m_NISTDataByElement[strCol01].strUpperLevelTerm.push_back(strCol13);
+        // std::cout << " 13: " << strCol13;
+        pcNISTData->strUpperLevelTerm.push_back(strCol13);
 
         nPos1 = nPos2;
         nPos2 = strLine.find(strSeparator, nPos1 + 1);
         strCol14 = strLine.substr(nPos1 + 1, nPos2 - nPos1 - 1);
         ltrim(strCol14); rtrim(strCol14);
 
-        std::cout << " 14: " << strCol14;
-        m_NISTDataByElement[strCol01].strUpperLevelJ.push_back(strCol14);
+        // std::cout << " 14: " << strCol14;
+        pcNISTData->strUpperLevelJ.push_back(strCol14);
 
         nPos1 = nPos2;
         nPos2 = strLine.find(strSeparator, nPos1 + 1);
@@ -268,13 +281,14 @@ void NIST::ConvertAndLoadNISTData() {
         ltrim(strCol17); rtrim(strCol17);
 
         // ConvertedDataFile << strLine << std::endl;     
-        std::cout << ;
+        // std::cout << std::endl;
 
-        m_NISTDataByElement[strCol01].nNumLines++;
+        pcNISTData->nNumLines++;
         nLineCounter++; 
 
         ConvertedDataFile << nLineCounter << " "
-                          << strCol01 << ';'
+                          << strCol01A << ';'
+                          << strCol01B << ';'
                           << strCol02 << ';'
                           << strCol03 << ';'
                           << strCol04 << ';'
@@ -297,6 +311,8 @@ void NIST::ConvertAndLoadNISTData() {
     }
     // Save data to converted file
   }
+
+  m_asNISTDataByElement[strElement] = pcNISTData;
 
   ConvertedDataFile.close();
   NISTDataFile.close();
