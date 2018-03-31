@@ -14,6 +14,7 @@ DataFit::DataFit() {
   m_afYSD.reserve(50000);
 
   m_eSelectedFittingFunction = GAUSSIAN;
+  m_nNumberOfFittingParameters = 3;
 
   m_bParametersIntialized = false;
 }
@@ -53,14 +54,12 @@ void DataFit::SetSearchWindow(double fXStart, double fXEnd) {
   }
   m_nEndIndex = nIndex;
 
-  if ((m_nEndIndex - m_nStartIndex) < m_nNumberOfFittingParameters) {
-    m_nEndIndex = m_nStartIndex + m_nNumberOfFittingParameters;
+  if ((m_nEndIndex - m_nStartIndex) < 5) {
+    m_nEndIndex = m_nStartIndex + 5;
   }
 
-  std::cout << m_nMaxIndex << " datapoints added. " << std::endl
-            << "Search window between " << fXStart << "nm and " << fXEnd << "nm." << std::endl
-            << "Selected data range starts at index " << m_nStartIndex << " and ends at index " << m_nEndIndex << "." << std::endl
-            << std::endl;
+  std::cout << "DW [" << fXStart << "nm:" << fXEnd << "nm]. IW ["
+            << m_nStartIndex << ":" << m_nEndIndex << "]. ";
 
   m_bWindowSelected = true;
   m_nSelectedSize = 0;
@@ -80,7 +79,7 @@ void DataFit::SetSearchWindow(double fXStart, double fXEnd) {
     //              "nm, intensity: "   << m_afSelectedY[m_nSelectedSize - 1] <<
     //              " counts and std dev: "     << m_afSelectedYSD[m_nSelectedSize - 1] << std::endl;
   }
-  std::cout << m_nSelectedSize << " datapoints selected." << std::endl << std::endl;
+  //std::cout << m_nSelectedSize << " datapoints selected." << std::endl << std::endl;
 }
 
 void DataFit::ClearSearchWindow() {
@@ -94,7 +93,7 @@ void DataFit::ClearSearchWindow() {
 
 void DataFit::SetFittingFunction(FunctionNames eFunction) {
   m_eSelectedFittingFunction = eFunction;
-  std::cout << "Gaussian fitting function selected." << std::endl;
+  //std::cout << "Gaussian fitting function selected." << std::endl;
 }
 
 int DataFit::GetNumberOfFunctionParameters() {
@@ -216,7 +215,7 @@ void DataFit::Fit() {
 
   gsl_multifit_nlinear_parameters fdf_params = gsl_multifit_nlinear_default_parameters();
 
-  std::cout << "Fitting session: " << std::endl;
+  std::cout << "Fit: ";
 
   // Find number of data points to use
   size_t n;
@@ -226,13 +225,13 @@ void DataFit::Fit() {
   else {
     n = m_afX.size();
   }
-  std::cout << "  Number of datapoints is " << n << "." << std::endl;
+  std::cout << "DP:  " << n ;
 
   // Default fitting function is GAUSSIAN. Set with SetFittingFunction above
 
   // Find number of parameters of fitting function
   const size_t p = GetNumberOfFunctionParameters();
-  std::cout << "  Number of fitting function parameters is " << p << "." << std::endl;
+  //std::cout << "  NP: " << p;
 
   gsl_vector *f;
   gsl_matrix *J;
@@ -279,20 +278,27 @@ void DataFit::Fit() {
   data d = { n, x_i, y, weights};
 
   // Parameter initialization;
-  std::cout << "  Parameter initialization:" << std::endl;
+  std::cout << "  IP: {" ;
   double x_init[p]; 
   if (m_bParametersIntialized) {
     for(int nI = 0; nI < p; nI++) {
       x_init[nI] = m_afInitialParameters[nI];
-      std::cout << "    p[" << nI << "] is " << x_init[nI] << std::endl;
+      std::cout << x_init[nI];
+      if (nI != (p-1)) { 
+        std::cout << ", ";
+      }
     }
   } 
   else {
     for(int nI = 0; nI < p; nI++) {
       x_init[nI] = 1.0;
-      std::cout << "    p[" << nI << "] is " << x_init[nI] << std::endl;
+      std::cout << x_init[nI];
+      if (nI != (p-1)) { 
+        std::cout << ", ";
+      }
     }
   }
+  std::cout << "} ";
 
   gsl_vector_view x   = gsl_vector_view_array(x_init, p);
   gsl_vector_view wts = gsl_vector_view_array(weights, n);
@@ -362,9 +368,9 @@ void DataFit::Fit() {
   //   fprintf (stderr, "b      = %.5f +/- %.5f\n", FIT(2), c*ERR(2));
   // }
 
-  fprintf (stderr, "status = %s\n", gsl_strerror (status));
+   std::cout << "s:" << status << " chisqr/dof: " << chisq/(n-p) << std::endl;
 
-  m_fChiSqr = chisq;
+  m_fChiSqr = chisq/(n-p);
   m_fGaussianAmplitude = FIT(0);
   m_fGaussianCenter    = FIT(1);
   m_fGaussianWidth     = FIT(2);
@@ -387,7 +393,7 @@ void DataFit::Fit() {
   gsl_multifit_nlinear_free (w);
   gsl_matrix_free (covar);
 
-  sleep(1);
+  // sleep(1);
 }
 
 double DataFit::Gaussian(const gsl_vector * padIndependents, double dX) {

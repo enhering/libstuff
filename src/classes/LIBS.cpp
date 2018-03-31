@@ -52,10 +52,11 @@ void LIBS::LoadData(std::string strFileName) {
 }
 
 void LIBS::ScanData(std::string strElement) {
-  double fLambdaSearchStart = 263.0;
+  double fLambdaSearchStart = 263.873718;
   double fLambdaSearchEnd   = 400.0;
 
-  double fLambdaMinWindowSize = 0.2;
+  double fLambdaMinWindowSize = 0.1;
+  double fLambdaHalfWindowWidth = fLambdaMinWindowSize / 2;
 
   double fLambdaWindowStart = fLambdaSearchStart;
 
@@ -63,25 +64,28 @@ void LIBS::ScanData(std::string strElement) {
   long nNISTIndex = 0;
   double fNISTLambda = 0;
 
-  while (fNISTLambda < fLambdaWindowStart) {
+  while (fNISTLambda < fLambdaSearchStart + fLambdaHalfWindowWidth) {
     fNISTLambda = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex];
     nNISTIndex++;
   }
 
-  // Find next NIST line 
-  double fNISTNextLambda = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex+1];
+  std::ofstream OutputFile;
+  std::string strOutputFileName = "FitData.txt";
+  OutputFile.open(strOutputFileName);
 
+  if (! OutputFile.is_open()) { 
+    std::cerr << "Error opening " << strOutputFileName << " for output." << std::endl;
+    exit(0);
+  }
 
-  // Try to guess window size
-  double fLambdaWindowEnd = (fNISTNextLambda + fNISTLambda) / 2;
+  m_pcDataFit->SetFittingFunction(GAUSSIAN);
 
   do {
+  
+    std::cout << "NIST: " << fNISTLambda << "nm ";
+    m_pcDataFit->SetSearchWindow(fNISTLambda - fLambdaHalfWindowWidth, fNISTLambda + fLambdaHalfWindowWidth);
 
-    m_pcDataFit->SetSearchWindow(fLambdaWindowStart, fLambdaWindowEnd);
-    m_pcDataFit->SetFittingFunction(GAUSSIAN);
-
-    double fWindowCenter = (fLambdaWindowEnd + fLambdaWindowStart) / 2;
-    std::vector<double> afParam = { 100.0, fNISTLambda, 0.001 };
+    std::vector<double> afParam = { 1.0, fNISTLambda, 0.001 };
     m_pcDataFit->InitializeParameters(afParam);
     m_pcDataFit->Fit();
 
@@ -92,16 +96,18 @@ void LIBS::ScanData(std::string strElement) {
     int    nStatus    = m_pcDataFit->GetFitStatus();
 
     if (nStatus == GSL_SUCCESS) {
-
+      OutputFile << fNISTLambda << " "
+                 << fCenter     << " "
+                 << fAmplitude  << " "
+                 << fWidth      << " "
+                 << fChiSqr     << std::endl;
     }
-
-    fLambdaWindowStart = fLambdaWindowEnd;
 
     nNISTIndex++;
     fNISTLambda     = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex];
-    fNISTNextLambda = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex+1];
-    fLambdaWindowEnd = (fNISTNextLambda + fNISTLambda) / 2;
     
-  } while (fLambdaWindowStart < fLambdaSearchEnd);
+  } while ((fNISTLambda + fLambdaHalfWindowWidth) < fLambdaSearchEnd);
+
+  OutputFile.close();
 }
 
