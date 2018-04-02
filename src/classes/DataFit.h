@@ -12,7 +12,8 @@
   #include "Base.h"
   
   enum FunctionNames {
-    GAUSSIAN
+    GAUSSIAN,
+    VOIGT
   };
 
   struct data {
@@ -44,12 +45,17 @@
       double GetGaussianCenter()    { return m_fGaussianCenter; };
       double GetGaussianWidth()     { return m_fGaussianWidth; };
       double GetGaussianAmplitude() { return m_fGaussianAmplitude; };
+      double GetLorentzAmplitude()  { return m_fLorentzAmplitude; };
+      double GetLorentzWidth()      { return m_fLorentzWidth; };
+      double GetCoeficient()        { return m_fCoeficient; };
       int    GetFitStatus()         { return m_nFitStatus; }; 
 
       static double Gaussian(const gsl_vector *, double);
       static double DGaussianDA(double, double, double, double);
       static double DGaussianDB(double, double, double, double);
       static double DGaussianDC(double, double, double, double);
+
+      static double Voigt(const gsl_vector * , double);
 
     private:
       std::vector<double> m_afX;
@@ -75,6 +81,9 @@
       double m_fGaussianCenter;
       double m_fGaussianWidth;
       double m_fGaussianAmplitude;
+      double m_fLorentzAmplitude;
+      double m_fLorentzWidth;
+      double m_fCoeficient;
       int    m_nFitStatus;
   };
 

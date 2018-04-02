@@ -55,7 +55,7 @@ void LIBS::ScanData(std::string strElement) {
   double fLambdaSearchStart = 263.873718;
   double fLambdaSearchEnd   = 400.0;
 
-  double fLambdaMinWindowSize = 0.1;
+  double fLambdaMinWindowSize = 0.2;
   double fLambdaHalfWindowWidth = fLambdaMinWindowSize / 2;
 
   double fLambdaWindowStart = fLambdaSearchStart;
@@ -78,14 +78,14 @@ void LIBS::ScanData(std::string strElement) {
     exit(0);
   }
 
-  m_pcDataFit->SetFittingFunction(GAUSSIAN);
+  m_pcDataFit->SetFittingFunction(VOIGT);
 
   do {
   
-    std::cout << "NIST: " << fNISTLambda << "nm ";
+    std::cout << "NIST line: " << fNISTLambda << "nm ";
     m_pcDataFit->SetSearchWindow(fNISTLambda - fLambdaHalfWindowWidth, fNISTLambda + fLambdaHalfWindowWidth);
 
-    std::vector<double> afParam = { 1.0, fNISTLambda, 0.001 };
+    std::vector<double> afParam = { 1.0, fNISTLambda, 0.001, 1.0, 0.001, 0.5 };
     m_pcDataFit->InitializeParameters(afParam);
     m_pcDataFit->Fit();
 

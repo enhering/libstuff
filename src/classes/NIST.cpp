@@ -19,7 +19,7 @@ void NIST::RetrieveNISTData() {
     char filename[128];
     snprintf(filename, 128, "NIST-ORIGINAL-WEB-FILE");
  
-    std::cout << "Downloading NIST data..." << std::endl;
+    std::cout << "Downloading NIST data...";
 
     out = fopen(filename, "wb");
  
@@ -41,6 +41,7 @@ void NIST::RetrieveNISTData() {
   }
  
   curl_global_cleanup();
+  std::cout << "Ok." << std::endl;
 }
 
 void NIST::ConvertAndLoadNISTData() {
@@ -51,7 +52,7 @@ void NIST::ConvertAndLoadNISTData() {
   std::string      strStartPattern = "<pre>";
   std::string      strEndPattern = "</pre>";
 
-  std::cout << "Converting NIST data..." << std::endl;
+  std::cout << "Converting NIST data...";
 
   NISTDataFile.open("NIST-ORIGINAL-WEB-FILE");
   ConvertedDataFile.open("NIST-CONVERTED-DATA");
@@ -316,4 +317,7 @@ void NIST::ConvertAndLoadNISTData() {
 
   ConvertedDataFile.close();
   NISTDataFile.close();
+
+  std::cout << "Ok." << std::endl;
+
 }

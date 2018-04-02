@@ -58,8 +58,8 @@ void DataFit::SetSearchWindow(double fXStart, double fXEnd) {
     m_nEndIndex = m_nStartIndex + 5;
   }
 
-  std::cout << "DW [" << fXStart << "nm:" << fXEnd << "nm]. IW ["
-            << m_nStartIndex << ":" << m_nEndIndex << "]. ";
+  std::cout << "DW[" << fXStart << "nm:" << fXEnd << "nm] IW["
+            << m_nStartIndex << ":" << m_nEndIndex << "] ";
 
   m_bWindowSelected = true;
   m_nSelectedSize = 0;
@@ -106,6 +106,7 @@ int DataFit::GetNumberOfFunctionParameters() {
     // case SPECIFIC_HEAT_JUMP:              m_nNumberOfFittingParameters = 3; break;
     // case TRANSITION:                      m_nNumberOfFittingParameters = 5; break;
     case GAUSSIAN:                        m_nNumberOfFittingParameters = 3; break;
+    case VOIGT:                           m_nNumberOfFittingParameters = 6; break;
     // case GAP:                             m_nNumberOfFittingParameters = 4; break;
     default:                              m_nNumberOfFittingParameters = 3; break;
   }
@@ -132,6 +133,11 @@ double DataFit::SelectedLaw(const gsl_vector * padIndependents, double dX) {
     
     case GAUSSIAN:
       dValue = DataFit::Gaussian(padIndependents, dX);
+      return(dValue);
+      break;
+
+    case VOIGT:
+      dValue = DataFit::Voigt(padIndependents, dX);
       return(dValue);
       break;
 
@@ -225,13 +231,13 @@ void DataFit::Fit() {
   else {
     n = m_afX.size();
   }
-  std::cout << "DP:  " << n ;
+  std::cout << "n: " << n ;
 
   // Default fitting function is GAUSSIAN. Set with SetFittingFunction above
 
   // Find number of parameters of fitting function
   const size_t p = GetNumberOfFunctionParameters();
-  //std::cout << "  NP: " << p;
+  std::cout << " p: " << p;
 
   gsl_vector *f;
   gsl_matrix *J;
@@ -255,7 +261,7 @@ void DataFit::Fit() {
     }    
   }
 
-  TCanvas canvas("a", "b", 500, 700, 400, 200);
+  TCanvas canvas("a", "b", 800, 700, 400, 200);
 
   TMultiGraph *mg = new TMultiGraph();
 
@@ -278,7 +284,7 @@ void DataFit::Fit() {
   data d = { n, x_i, y, weights};
 
   // Parameter initialization;
-  std::cout << "  IP: {" ;
+  std::cout << " IP {" ;
   double x_init[p]; 
   if (m_bParametersIntialized) {
     for(int nI = 0; nI < p; nI++) {
@@ -374,13 +380,17 @@ void DataFit::Fit() {
   m_fGaussianAmplitude = FIT(0);
   m_fGaussianCenter    = FIT(1);
   m_fGaussianWidth     = FIT(2);
+  m_fLorentzAmplitude  = FIT(3);
+  m_fLorentzWidth      = FIT(4);
+  m_fCoeficient        = FIT(5);
   m_nFitStatus = status;
-  
+
   // double fXStart = x_i[0];
   // double fXEnd   = x_i[n-1];
 
   for (long nIndex = 0; nIndex < n; nIndex++) {
-    y[nIndex] = m_fGaussianAmplitude * exp(-1*((pow((x_i[nIndex]-m_fGaussianCenter),2))/(2*m_fGaussianWidth *m_fGaussianWidth)));
+    // y[nIndex] = m_fGaussianAmplitude * exp(-1*((pow((x_i[nIndex]-m_fGaussianCenter),2))/(2*m_fGaussianWidth *m_fGaussianWidth)));
+    y[nIndex] = SelectedLaw(w->x, x_i[nIndex]);
   } 
   TGraph * graph2 = new TGraph(n, x_i, y);
 
@@ -396,25 +406,36 @@ void DataFit::Fit() {
   // sleep(1);
 }
 
-double DataFit::Gaussian(const gsl_vector * padIndependents, double dX) {
-  double dA = gsl_vector_get(padIndependents,0);
-  double dB = gsl_vector_get(padIndependents,1);
-  double dC = gsl_vector_get(padIndependents,2);
+double DataFit::Gaussian(const gsl_vector * padIndependents, double fX) {
+  double fA = gsl_vector_get(padIndependents,0);
+  double fB = gsl_vector_get(padIndependents,1);
+  double fC = gsl_vector_get(padIndependents,2);
 
-  return (dA * exp(-1*((pow((dX-dB),2))/(2*dC*dC))));
+  return (fA * exp(-1*((pow((fX-fB),2))/(2*fC*fC))));
 }
 
-double DataFit::DGaussianDA(double dA, double dB, double dC, double dX) {
-  return(-dA * exp(-1*((pow(dX-dB,2))/(2*dC*dC))));
+double DataFit::DGaussianDA(double fA, double fB, double fC, double fX) {
+  return(-fA * exp(-1*((pow(fX-fB,2))/(2*fC*fC))));
 }
 
-double DataFit::DGaussianDB(double dA, double dB, double dC, double dX) {
-  return(((dA * (dB - dX)) / (dC*dC)) * exp(-1*((pow((dX-dB),2))/(2*dC*dC))));
+double DataFit::DGaussianDB(double fA, double fB, double fC, double fX) {
+  return(((fA * (fB - fX)) / (fC*fC)) * exp(-1*((pow((fX-fB),2))/(2*fC*fC))));
 }
 
-double DataFit::DGaussianDC(double dA, double dB, double dC, double dX) {
-  return(((-1 * dA * pow((dX-dB),2)) / (pow(dC,3))) * exp(-1*((pow((dX-dB),2))/(2*dC*dC))));
+double DataFit::DGaussianDC(double fA, double fB, double fC, double fX) {
+  return(((-1 * fA * pow((fX-fB),2)) / (pow(fC,3))) * exp(-1*((pow((fX-fB),2))/(2*fC*fC))));
 }
 
+double DataFit::Voigt(const gsl_vector * padIndependents, double fX) {
+  double fA = gsl_vector_get(padIndependents,0); // Gaussian amplitude
+  double fB = gsl_vector_get(padIndependents,1); // Gaussian center
+  double fC = gsl_vector_get(padIndependents,2); // Gaussian width
+  double fD = gsl_vector_get(padIndependents,3); // Lorentzian amplitude
+  double fE = gsl_vector_get(padIndependents,4); // Lorentzian width
+  double fF = gsl_vector_get(padIndependents,5); // linear combination parameter
+
+  return (    fF  * (fA * exp(-1*((pow((fX-fB),2))/(2*fC*fC)))) +
+           (1-fF) * fD * (pow(fE,2) / (pow((fX - fB), 2) + (fE * fE) ))) ;
+}
 
 
