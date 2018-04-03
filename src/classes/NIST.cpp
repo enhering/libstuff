@@ -120,6 +120,7 @@ void NIST::ConvertAndLoadNISTData() {
         strCol01B = strLine.substr(0, nPos2 - nPos1);
         ltrim(strCol01B); rtrim(strCol01B);
         
+        cNISTData.m_astrIonizationLevel.push_back(strCol01B);
         // std::cout << nLineCounter << ": ";
 
         // std::cout << " 01: " << strCol01;
@@ -133,8 +134,8 @@ void NIST::ConvertAndLoadNISTData() {
         fValue = 0.0;
         if (! strCol02.empty()) {
           fValue = stof(strCol02);
-          cNISTData.m_afObservedWavelength_nm.push_back(fValue);
         }
+        cNISTData.m_afObservedWavelength_nm.push_back(fValue);
 
         nPos1 = nPos2;
         nPos2 = strLine.find(strSeparator, nPos1 + 1);
@@ -145,8 +146,8 @@ void NIST::ConvertAndLoadNISTData() {
         fValue = 0.0;
         if (! strCol03.empty()) {
           fValue = stof(strCol03);
-          cNISTData.m_afRitzWavelength_nm.push_back(fValue);
         }
+        cNISTData.m_afRitzWavelength_nm.push_back(fValue);
         
         nPos1 = nPos2;
         nPos2 = strLine.find(strSeparator, nPos1 + 1);
@@ -157,8 +158,8 @@ void NIST::ConvertAndLoadNISTData() {
         fValue = 0.0;
         if (! strCol04.empty()) {
           fValue = stof(strCol04);
-          cNISTData.m_afUncertainty_nm.push_back(fValue);
         }
+        cNISTData.m_afUncertainty_nm.push_back(fValue);
 
         nPos1 = nPos2;
         nPos2 = strLine.find(strSeparator, nPos1 + 1);
@@ -177,8 +178,8 @@ void NIST::ConvertAndLoadNISTData() {
         fValue = 0.0;
         if (! strCol06.empty()) {
           fValue = stof(strCol06);
-          cNISTData.m_afAki_sec_minus_one.push_back(fValue);
         }
+        cNISTData.m_afAki_sec_minus_one.push_back(fValue);
 
         nPos1 = nPos2;
         nPos2 = strLine.find(strSeparator, nPos1 + 1);
@@ -202,9 +203,9 @@ void NIST::ConvertAndLoadNISTData() {
         // std::cout << " 08A: " << strCol08A;
         fValue = 0.0;
         if (! strCol08A.empty()) {
-          fValue = stof(strCol08A);
-          cNISTData.m_afEi_eV.push_back(fValue);
+          fValue = stof(strCol08A);          
         }
+        cNISTData.m_afEi_eV.push_back(fValue);
 
         nPos1 = nPos2;
         nPos2 = strLine.find(strSeparator, nPos1 + 1);    
@@ -215,8 +216,8 @@ void NIST::ConvertAndLoadNISTData() {
         fValue = 0.0;
         if (! strCol08B.empty()) {
           fValue = stof(strCol08B);
-          cNISTData.m_afEf_eV.push_back(fValue);
         }
+        cNISTData.m_afEf_eV.push_back(fValue);
 
         nPos1 = nPos2;
         nPos2 = strLine.find(strSeparator, nPos1 + 1);

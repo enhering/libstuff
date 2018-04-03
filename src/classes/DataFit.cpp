@@ -61,8 +61,8 @@ void DataFit::SetSearchWindow(double fXStart, double fXEnd) {
     m_nEndIndex = m_nStartIndex + 5;
   }
 
-  std::cout << "DW[" << fXStart << "nm:" << fXEnd << "nm] IW["
-            << m_nStartIndex << ":" << m_nEndIndex << "] ";
+  // std::cout << "DW[" << fXStart << "nm:" << fXEnd << "nm] IW["
+  //           << m_nStartIndex << ":" << m_nEndIndex << "] ";
 
   m_bWindowSelected = true;
   m_nSelectedSize = 0;
@@ -230,7 +230,7 @@ void DataFit::Fit() {
 
   gsl_multifit_nlinear_parameters fdf_params = gsl_multifit_nlinear_default_parameters();
 
-  std::cout << "Fit: ";
+  //std::cout << "Fit: ";
 
   // Find number of data points to use
   size_t n;
@@ -240,13 +240,13 @@ void DataFit::Fit() {
   else {
     n = m_afX.size();
   }
-  std::cout << "n: " << n ;
+  //std::cout << "n: " << n ;
 
   // Default fitting function is GAUSSIAN. Set with SetFittingFunction above
 
   // Find number of parameters of fitting function
   const size_t p = GetNumberOfFunctionParameters();
-  std::cout << " p: " << p;
+  //std::cout << " p: " << p;
 
   gsl_vector *f;
   gsl_matrix *J;
@@ -271,31 +271,31 @@ void DataFit::Fit() {
 
     if (m_bRemoveBakground) {
       if (m_bBackgroundEstimated) {
-        double dNoise = y[nIndex] - (m_fLinearBackgroundA + m_fLinearBackgroundB * x_i[nIndex]);
-        if (dNoise < 0) {
-          dNoise = 0;
-          y[nIndex] -= dNoise;
+        double dNoise = (m_fLinearBackgroundA + m_fLinearBackgroundB * x_i[nIndex]);
+        y[nIndex] -= dNoise;
+        if (y[nIndex] < 0) {
+          y[nIndex] = 0;
         }  
       }
     }
   }
 
-  TCanvas canvas("a", "b", 800, 100, 600, 400);
+  // TCanvas canvas("a", "b", 800, 100, 600, 400);
 
-  TMultiGraph *mg = new TMultiGraph();
+  // TMultiGraph *mg = new TMultiGraph();
 
-  TGraph * graph = new TGraph(n, x_i, y);
-  graph->SetTitle("LIBS data");
+  // TGraph * graph = new TGraph(n, x_i, y);
+  // graph->SetTitle("LIBS data");
   
-  graph->SetMarkerStyle(2);
-  graph->SetMarkerColor(4);
-  graph->SetMarkerSize(0.3);
-  graph->SetLineColor(4);
-  graph->SetLineWidth(1);
-  graph->GetXaxis()->SetNdivisions(5, kTRUE);
-  graph->GetYaxis()->SetLabelSize(1.0);
+  // graph->SetMarkerStyle(2);
+  // graph->SetMarkerColor(4);
+  // graph->SetMarkerSize(0.3);
+  // graph->SetLineColor(4);
+  // graph->SetLineWidth(1);
+  // graph->GetXaxis()->SetNdivisions(5, kTRUE);
+  // graph->GetYaxis()->SetLabelSize(1.0);
 
-  mg->Add(graph, "APL");
+  // mg->Add(graph, "APL");
 
   // graph.Draw("APL");
   // canvas.Update();
@@ -304,27 +304,27 @@ void DataFit::Fit() {
   data d = { n, x_i, y, weights};
 
   // Parameter initialization;
-  std::cout << " IP {" ;
+  //std::cout << " IP {" ;
   double x_init[p]; 
   if (m_bParametersIntialized) {
     for(int nI = 0; nI < p; nI++) {
       x_init[nI] = m_afInitialParameters[nI];
-      std::cout << x_init[nI];
-      if (nI != (p-1)) { 
-        std::cout << ", ";
-      }
+      //std::cout << x_init[nI];
+      // if (nI != (p-1)) { 
+        //std::cout << ", ";
+      // }
     }
   } 
   else {
     for(int nI = 0; nI < p; nI++) {
       x_init[nI] = 1.0;
-      std::cout << x_init[nI];
-      if (nI != (p-1)) { 
-        std::cout << ", ";
-      }
+      // std::cout << x_init[nI];
+      // if (nI != (p-1)) { 
+      //   std::cout << ", ";
+      // }
     }
   }
-  std::cout << "} ";
+  // std::cout << "} ";
 
   gsl_vector_view x   = gsl_vector_view_array(x_init, p);
   gsl_vector_view wts = gsl_vector_view_array(weights, n);
@@ -396,7 +396,7 @@ void DataFit::Fit() {
 
   m_fChiSqr = chisq/(n-p);
 
-  std::cout << "s:" << status << " chisqr/dof: " << m_fChiSqr << std::endl;
+  //std::cout << "s:" << status << " chisqr/dof: " << m_fChiSqr << std::endl;
 
   m_afParameters.clear();
   m_afParameterErrors.clear();
@@ -412,13 +412,13 @@ void DataFit::Fit() {
   for (long nIndex = 0; nIndex < n; nIndex++) {
     y[nIndex] = SelectedLaw(w->x, x_i[nIndex]);
   } 
-  TGraph * graph2 = new TGraph(n, x_i, y);
+  // TGraph * graph2 = new TGraph(n, x_i, y);
 
-  mg->Add(graph2, "cp");
-  mg->Draw("a");
+  // mg->Add(graph2, "cp");
+  // mg->Draw("a");
 
-  canvas.Update();
-  gSystem->ProcessEvents();
+  // canvas.Update();
+  // gSystem->ProcessEvents();
 
   gsl_multifit_nlinear_free (w);
   gsl_matrix_free (covar);
@@ -432,7 +432,7 @@ void DataFit::EstimateDataBackground() {
   ClearSearchWindow();
   SetFittingFunction(LINEAR);
 
-  std::vector<double> afParam = { 1.0, 1.0 };
+  std::vector<double> afParam = { 10.0, 0.01 };
   InitializeParameters(afParam);
   Fit();
 
@@ -484,9 +484,10 @@ double DataFit::Voigt(const gsl_vector * padIndependents, double fX) {
   double fA = gsl_vector_get(padIndependents,0); 
   double fB = gsl_vector_get(padIndependents,1); 
   double fC = gsl_vector_get(padIndependents,2);
-  double fD = gsl_vector_get(padIndependents,2);
+  double fD = gsl_vector_get(padIndependents,3);
 
-  return ( fC * TMath::Voigt((fX-fD), fA, fB) ) ;
+  return ( fD * TMath::Voigt((fX-fC), fA, fB) ) ;
+  //return ( TMath::Voigt((fX-fC), fA, fB) ) ;
 }
 
 double DataFit::Linear(const gsl_vector * padIndependents, double fX) {

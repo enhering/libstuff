@@ -51,7 +51,7 @@ void LIBS::LoadData(std::string strFileName) {
 
 void LIBS::ScanData(std::string strElement) {
   double fLambdaSearchStart = 263.873718;
-  double fLambdaSearchEnd   = 400.0;
+  double fLambdaSearchEnd   = 700.0;
 
   double fLambdaMinWindowSize = 0.1;
   double fLambdaHalfWindowWidth = fLambdaMinWindowSize / 2;
@@ -76,19 +76,18 @@ void LIBS::ScanData(std::string strElement) {
     exit(0);
   }
 
-  // m_pcDataFit->EstimateDataBackground();
-  // m_pcDataFit->RemoveBackground();
+  m_pcDataFit->EstimateDataBackground();
+  m_pcDataFit->RemoveBackground();
 
   FunctionNames eFittingFunction = VOIGT;
 
   m_pcDataFit->SetFittingFunction(eFittingFunction);
 
   do {
-
-    std::cout << "NIST line: " << fNISTLambda << "nm ";
+    // std::cout << "NIST line: " << fNISTLambda << "nm ";
     m_pcDataFit->SetSearchWindow(fNISTLambda - fLambdaHalfWindowWidth, fNISTLambda + fLambdaHalfWindowWidth);
 
-    std::vector<double> afParam = { 0.1, 0.1, 100, fNISTLambda };
+    std::vector<double> afParam = { 0.1, 0.1, fNISTLambda, 100};
     m_pcDataFit->InitializeParameters(afParam);
 
     m_pcDataFit->Fit();
@@ -104,26 +103,61 @@ void LIBS::ScanData(std::string strElement) {
     double fLg      = afMinimizedParameters[1];
     double fLgError = afMinimizedParameterErrors[1];
 
-    double fAmplitude = afMinimizedParameters[2];
-    double fAmplitudeError = afMinimizedParameterErrors[2];
+    double fCenter = afMinimizedParameters[2];
+    double fCenterError = afMinimizedParameterErrors[2];   
 
-    double fCenter = afMinimizedParameters[3];
-    double fCenterError = afMinimizedParameterErrors[3];    
+    double fAmplitude = afMinimizedParameters[3]; 
+    double fAmplitudeError = afMinimizedParameterErrors[3];
 
     double fChiSqr = m_pcDataFit->GetChiSqr();
     int    nStatus = m_pcDataFit->GetFitStatus();
 
-    if (nStatus == GSL_SUCCESS) {
-      if (fCenterError < (fCenter * 0.1)) {
+    std::cout  << "Searching NIST line: " << fNISTLambda << "nm: ";
 
-        std::cout  << "  Good fit: "
-                   << fCenter     << "+-" << fCenterError << ", "
-                   << fLg         << "+-" << fLgError << std::endl;
+    if (nStatus == GSL_SUCCESS) {
+      if ( (fCenterError < (fCenter     * 0.1)) &&
+           (fabs(fNISTLambda - fCenter) < 0.05) &&
+           (fLg          < 1) &&
+           (fSigma       < 1) ) {
+
+        std::cout  << "Found: " 
+                   << fCenter     << "+-" << fCenterError    << ", "
+                   << fLg         << "+-" << fLgError        << ", "
+                   << fSigma      << "+-" << fSigmaError     << std::endl;
+
+        OutputFile  << m_pcNIST->m_acNISTDataByElement[strElement].m_astrIonizationLevel[nNISTIndex] << " "
+                    << m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex] << " "
+                    << m_pcNIST->m_acNISTDataByElement[strElement].m_afRitzWavelength_nm[nNISTIndex] << " "
+                    << fCenter     << "+-" << fCenterError    << " "
+                    << fLg         << "+-" << fLgError        << " "
+                    << fSigma      << "+-" << fSigmaError     << " "
+                    << fAmplitude  << "+-" << fAmplitudeError << " "
+                    << m_pcNIST->m_acNISTDataByElement[strElement].m_afUncertainty_nm[nNISTIndex] << " "
+                    << m_pcNIST->m_acNISTDataByElement[strElement].m_astrRelInt[nNISTIndex] << " "
+                    << m_pcNIST->m_acNISTDataByElement[strElement].m_afAki_sec_minus_one[nNISTIndex] << " "
+                    << m_pcNIST->m_acNISTDataByElement[strElement].m_astrAcc[nNISTIndex] << " "
+                    << m_pcNIST->m_acNISTDataByElement[strElement].m_afEi_eV[nNISTIndex] << " "
+                    << m_pcNIST->m_acNISTDataByElement[strElement].m_afEf_eV[nNISTIndex] << " "
+                    << m_pcNIST->m_acNISTDataByElement[strElement].m_astrLowerLevelConf[nNISTIndex] << " "
+                    << m_pcNIST->m_acNISTDataByElement[strElement].m_astrLowerLevelTerm[nNISTIndex] << " "
+                    << m_pcNIST->m_acNISTDataByElement[strElement].m_astrLowerLevelJ[nNISTIndex] << " "
+                    << m_pcNIST->m_acNISTDataByElement[strElement].m_astrUpperLevelConf[nNISTIndex] << " "
+                    << m_pcNIST->m_acNISTDataByElement[strElement].m_astrUpperLevelTerm[nNISTIndex] << " "
+                    << m_pcNIST->m_acNISTDataByElement[strElement].m_astrUpperLevelJ[nNISTIndex] << " "
+                    << std::endl;
       }
+      else {
+        std::cout << "large error of fitting parameters." << std::endl;
+      }
+    }
+    else {
+      std::cout << "Fitting failed." << std::endl;
     }
 
     nNISTIndex++;
     fNISTLambda     = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex];
+
+    // std::cin.get();
     
   } while ((fNISTLambda + fLambdaHalfWindowWidth) < fLambdaSearchEnd);
 
