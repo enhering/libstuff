@@ -318,6 +318,6 @@ void NIST::ConvertAndLoadNISTData() {
   ConvertedDataFile.close();
   NISTDataFile.close();
 
-  std::cout << "Ok." << std::endl;
+  std::cout << "Ok." << std::endl << std::endl;
 
 }

@@ -9,11 +9,14 @@
   #include <gsl/gsl_blas.h>
   #include <gsl/gsl_multifit_nlinear.h>
 
+  #include "TMath.h"
+
   #include "Base.h"
   
   enum FunctionNames {
     GAUSSIAN,
-    VOIGT
+    VOIGT, 
+    LINEAR
   };
 
   struct data {
@@ -40,14 +43,13 @@
       static int DF(const gsl_vector *, void *, gsl_matrix *);
       static void Callback(const size_t, void *, const gsl_multifit_nlinear_workspace *);
       void Fit();
+      void EstimateDataBackground();
+      void RemoveBackground()      { m_bRemoveBakground = true;  };
+      void DoNotRemoveBackground() { m_bRemoveBakground = false; };
 
       double GetChiSqr()            { return m_fChiSqr; };
-      double GetGaussianCenter()    { return m_fGaussianCenter; };
-      double GetGaussianWidth()     { return m_fGaussianWidth; };
-      double GetGaussianAmplitude() { return m_fGaussianAmplitude; };
-      double GetLorentzAmplitude()  { return m_fLorentzAmplitude; };
-      double GetLorentzWidth()      { return m_fLorentzWidth; };
-      double GetCoeficient()        { return m_fCoeficient; };
+      void   GetMinimizedParameters(std::vector<double> &);
+      void   GetMinimizedParameterErrors(std::vector<double> &);
       int    GetFitStatus()         { return m_nFitStatus; }; 
 
       static double Gaussian(const gsl_vector *, double);
@@ -56,6 +58,7 @@
       static double DGaussianDC(double, double, double, double);
 
       static double Voigt(const gsl_vector * , double);
+      static double Linear(const gsl_vector * , double);
 
     private:
       std::vector<double> m_afX;
@@ -67,7 +70,6 @@
       std::vector<double> m_afSelectedYSD;      
 
       std::vector<double> m_afInitialParameters;
-      std::vector<double> m_afParameters;
       bool                m_bParametersIntialized;
 
       long m_nStartIndex, m_nEndIndex, m_nMaxIndex;
@@ -77,14 +79,14 @@
       static FunctionNames m_eSelectedFittingFunction;
       uint8_t              m_nNumberOfFittingParameters;
 
+      std::vector<double> m_afParameters;
+      std::vector<double> m_afParameterErrors;
       double m_fChiSqr;
-      double m_fGaussianCenter;
-      double m_fGaussianWidth;
-      double m_fGaussianAmplitude;
-      double m_fLorentzAmplitude;
-      double m_fLorentzWidth;
-      double m_fCoeficient;
       int    m_nFitStatus;
+
+      bool   m_bBackgroundEstimated;
+      double m_fLinearBackgroundA, m_fLinearBackgroundB; // f=a+bx
+      bool   m_bRemoveBakground;
   };
 
 #endif

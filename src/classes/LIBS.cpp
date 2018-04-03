@@ -13,7 +13,7 @@ void LIBS::LoadData(std::string strFileName) {
   std::string   strLine;
   std::ifstream InputFile;
 
-  std::cout << "Input data file is: " << strFileName << std::endl;
+  std::cout << "Input LIBS data file is: " << strFileName << std::endl << std::endl;
 
   InputFile.open(strFileName);
 
@@ -45,8 +45,6 @@ void LIBS::LoadData(std::string strFileName) {
     fLambda = std::stof(strCol01);
     fIntensity = std::stof(strCol02);
 
-    // pcTomatoHistogram->Fill(fLambda, fIntensity);
-
     m_pcDataFit->AddDataPoint(fLambda, fIntensity, 1.0);
   }
 }
@@ -55,7 +53,7 @@ void LIBS::ScanData(std::string strElement) {
   double fLambdaSearchStart = 263.873718;
   double fLambdaSearchEnd   = 400.0;
 
-  double fLambdaMinWindowSize = 0.2;
+  double fLambdaMinWindowSize = 0.1;
   double fLambdaHalfWindowWidth = fLambdaMinWindowSize / 2;
 
   double fLambdaWindowStart = fLambdaSearchStart;
@@ -70,7 +68,7 @@ void LIBS::ScanData(std::string strElement) {
   }
 
   std::ofstream OutputFile;
-  std::string strOutputFileName = "FitData.txt";
+  std::string strOutputFileName = "FitResults.txt";
   OutputFile.open(strOutputFileName);
 
   if (! OutputFile.is_open()) { 
@@ -78,29 +76,50 @@ void LIBS::ScanData(std::string strElement) {
     exit(0);
   }
 
-  m_pcDataFit->SetFittingFunction(VOIGT);
+  // m_pcDataFit->EstimateDataBackground();
+  // m_pcDataFit->RemoveBackground();
+
+  FunctionNames eFittingFunction = VOIGT;
+
+  m_pcDataFit->SetFittingFunction(eFittingFunction);
 
   do {
-  
+
     std::cout << "NIST line: " << fNISTLambda << "nm ";
     m_pcDataFit->SetSearchWindow(fNISTLambda - fLambdaHalfWindowWidth, fNISTLambda + fLambdaHalfWindowWidth);
 
-    std::vector<double> afParam = { 1.0, fNISTLambda, 0.001, 1.0, 0.001, 0.5 };
+    std::vector<double> afParam = { 0.1, 0.1, 100, fNISTLambda };
     m_pcDataFit->InitializeParameters(afParam);
+
     m_pcDataFit->Fit();
 
-    double fAmplitude = m_pcDataFit->GetGaussianAmplitude();
-    double fCenter    = m_pcDataFit->GetGaussianCenter();
-    double fWidth     = m_pcDataFit->GetGaussianWidth();
-    double fChiSqr    = m_pcDataFit->GetChiSqr();
-    int    nStatus    = m_pcDataFit->GetFitStatus();
+    std::vector<double> afMinimizedParameters;
+    std::vector<double> afMinimizedParameterErrors;
+    m_pcDataFit->GetMinimizedParameters(afMinimizedParameters);
+    m_pcDataFit->GetMinimizedParameterErrors(afMinimizedParameterErrors);
+
+    double fSigma = afMinimizedParameters[0];
+    double fSigmaError = afMinimizedParameterErrors[0];
+
+    double fLg      = afMinimizedParameters[1];
+    double fLgError = afMinimizedParameterErrors[1];
+
+    double fAmplitude = afMinimizedParameters[2];
+    double fAmplitudeError = afMinimizedParameterErrors[2];
+
+    double fCenter = afMinimizedParameters[3];
+    double fCenterError = afMinimizedParameterErrors[3];    
+
+    double fChiSqr = m_pcDataFit->GetChiSqr();
+    int    nStatus = m_pcDataFit->GetFitStatus();
 
     if (nStatus == GSL_SUCCESS) {
-      OutputFile << fNISTLambda << " "
-                 << fCenter     << " "
-                 << fAmplitude  << " "
-                 << fWidth      << " "
-                 << fChiSqr     << std::endl;
+      if (fCenterError < (fCenter * 0.1)) {
+
+        std::cout  << "  Good fit: "
+                   << fCenter     << "+-" << fCenterError << ", "
+                   << fLg         << "+-" << fLgError << std::endl;
+      }
     }
 
     nNISTIndex++;
