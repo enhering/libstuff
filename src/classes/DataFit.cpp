@@ -57,12 +57,12 @@ void DataFit::SetSearchWindow(double fXStart, double fXEnd) {
   }
   m_nEndIndex = nIndex;
 
-  if ((m_nEndIndex - m_nStartIndex) < 5) {
-    m_nEndIndex = m_nStartIndex + 5;
+  if ((m_nEndIndex - m_nStartIndex) < GetNumberOfFunctionParameters() ) {
+    m_nEndIndex = m_nStartIndex + GetNumberOfFunctionParameters()  + 5;
   }
 
-  // std::cout << "DW[" << fXStart << "nm:" << fXEnd << "nm] IW["
-  //           << m_nStartIndex << ":" << m_nEndIndex << "] ";
+  std::cout << "DW[" << fXStart << "nm:" << fXEnd << "nm] IW["
+            << m_nStartIndex << ":" << m_nEndIndex << "] ";
 
   m_bWindowSelected = true;
   m_nSelectedSize = 0;
@@ -96,6 +96,7 @@ void DataFit::ClearSearchWindow() {
 
 void DataFit::SetFittingFunction(FunctionNames eFunction) {
   m_eSelectedFittingFunction = eFunction;
+  m_nNumberOfFittingParameters = GetNumberOfFunctionParameters();
   //std::cout << "Gaussian fitting function selected." << std::endl;
 }
 
@@ -111,6 +112,7 @@ int DataFit::GetNumberOfFunctionParameters() {
     case GAUSSIAN:                        m_nNumberOfFittingParameters = 3; break;
     case VOIGT:                           m_nNumberOfFittingParameters = 4; break;
     case LINEAR:                          m_nNumberOfFittingParameters = 2; break;
+    case TRIPLEVOIGT:                     m_nNumberOfFittingParameters = 12; break; 
     // case GAP:                             m_nNumberOfFittingParameters = 4; break;
     default:                              m_nNumberOfFittingParameters = 3; break;
   }
@@ -130,23 +132,28 @@ void DataFit::InitializeParameters(std::vector<double> & afP) {
   m_bParametersIntialized = true;
 }
 
-double DataFit::SelectedLaw(const gsl_vector * padIndependents, double dX) {
+double DataFit::SelectedLaw(const gsl_vector * padIndependents, double fX) {
   double dValue;
 
   switch (m_eSelectedFittingFunction) {
     
     case GAUSSIAN:
-      dValue = DataFit::Gaussian(padIndependents, dX);
+      dValue = DataFit::Gaussian(padIndependents, fX);
       return(dValue);
       break;
 
     case VOIGT:
-      dValue = DataFit::Voigt(padIndependents, dX);
+      dValue = DataFit::Voigt(padIndependents, fX);
       return(dValue);
       break;
 
     case LINEAR:
-      dValue = DataFit::Linear(padIndependents, dX);
+      dValue = DataFit::Linear(padIndependents, fX);
+      return(dValue);
+      break;
+
+    case TRIPLEVOIGT:
+      dValue = DataFit::TripleVoigt(padIndependents, fX);
       return(dValue);
       break;
 
@@ -280,22 +287,22 @@ void DataFit::Fit() {
     }
   }
 
-  // TCanvas canvas("a", "b", 800, 100, 600, 400);
+  TCanvas canvas("a", "b", 800, 100, 600, 400);
 
-  // TMultiGraph *mg = new TMultiGraph();
+  TMultiGraph *mg = new TMultiGraph();
 
-  // TGraph * graph = new TGraph(n, x_i, y);
-  // graph->SetTitle("LIBS data");
+  TGraph * graph = new TGraph(n, x_i, y);
+  graph->SetTitle("LIBS data");
   
-  // graph->SetMarkerStyle(2);
-  // graph->SetMarkerColor(4);
-  // graph->SetMarkerSize(0.3);
-  // graph->SetLineColor(4);
-  // graph->SetLineWidth(1);
-  // graph->GetXaxis()->SetNdivisions(5, kTRUE);
-  // graph->GetYaxis()->SetLabelSize(1.0);
+  graph->SetMarkerStyle(2);
+  graph->SetMarkerColor(4);
+  graph->SetMarkerSize(0.3);
+  graph->SetLineColor(4);
+  graph->SetLineWidth(1);
+  graph->GetXaxis()->SetNdivisions(5, kTRUE);
+  graph->GetYaxis()->SetLabelSize(1.0);
 
-  // mg->Add(graph, "APL");
+  mg->Add(graph, "APL");
 
   // graph.Draw("APL");
   // canvas.Update();
@@ -412,13 +419,13 @@ void DataFit::Fit() {
   for (long nIndex = 0; nIndex < n; nIndex++) {
     y[nIndex] = SelectedLaw(w->x, x_i[nIndex]);
   } 
-  // TGraph * graph2 = new TGraph(n, x_i, y);
+  TGraph * graph2 = new TGraph(n, x_i, y);
 
-  // mg->Add(graph2, "cp");
-  // mg->Draw("a");
+  mg->Add(graph2, "cp");
+  mg->Draw("a");
 
-  // canvas.Update();
-  // gSystem->ProcessEvents();
+  canvas.Update();
+  gSystem->ProcessEvents();
 
   gsl_multifit_nlinear_free (w);
   gsl_matrix_free (covar);
@@ -488,6 +495,28 @@ double DataFit::Voigt(const gsl_vector * padIndependents, double fX) {
 
   return ( fD * TMath::Voigt((fX-fC), fA, fB) ) ;
   //return ( TMath::Voigt((fX-fC), fA, fB) ) ;
+}
+
+double DataFit::TripleVoigt(const gsl_vector * padIndependents, double fX) {
+  double fP1 = gsl_vector_get(padIndependents,0); 
+  double fP2 = gsl_vector_get(padIndependents,1); 
+  double fP3 = gsl_vector_get(padIndependents,2);
+  double fP4 = gsl_vector_get(padIndependents,3);
+
+  double fP5 = gsl_vector_get(padIndependents,4); 
+  double fP6 = gsl_vector_get(padIndependents,5); 
+  double fP7 = gsl_vector_get(padIndependents,6);
+  double fP8 = gsl_vector_get(padIndependents,7);
+
+  double fP9 = gsl_vector_get(padIndependents,8); 
+  double fP10 = gsl_vector_get(padIndependents,9); 
+  double fP11 = gsl_vector_get(padIndependents,10);
+  double fP12 = gsl_vector_get(padIndependents,11);
+
+  return ( (fP4  * TMath::Voigt((fX-fP3 ), fP1, fP2)) +
+           (fP8  * TMath::Voigt((fX-fP7 ), fP5, fP6)) +
+           (fP12 * TMath::Voigt((fX-fP11), fP9, fP10)) ) ;
+
 }
 
 double DataFit::Linear(const gsl_vector * padIndependents, double fX) {

@@ -16,7 +16,8 @@
   enum FunctionNames {
     GAUSSIAN,
     VOIGT, 
-    LINEAR
+    LINEAR, 
+    TRIPLEVOIGT
   };
 
   struct data {
@@ -32,6 +33,10 @@
       ~DataFit();
 
       void AddDataPoint(double, double, double);
+      double GetY(long nIndex)   { return m_afY[nIndex]; }
+      double GetX(long nIndex)   { return m_afX[nIndex]; }
+      double GetYSD(long nIndex) { return m_afYSD[nIndex]; }
+
       void SetSearchWindow(double, double);
       void ClearSearchWindow();
       void SetFittingFunction(FunctionNames);
@@ -57,6 +62,7 @@
       static double DGaussianDB(double, double, double, double);
       static double DGaussianDC(double, double, double, double);
 
+      static double TripleVoigt(const gsl_vector * , double);
       static double Voigt(const gsl_vector * , double);
       static double Linear(const gsl_vector * , double);
 
