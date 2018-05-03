@@ -18,6 +18,7 @@
   #include "Base.h"
   #include "NIST.h"
   #include "DataFit.h"
+  #include "DataSet.h"
 
   class LIBS : public Base {
     public:
@@ -26,9 +27,10 @@
 
       void SetNISTObjectPointer(NIST * pcNIST) { m_pcNIST = pcNIST; };
       
-      void LoadData(std::string);
+      void LoadData(std::string, DataSet);
       void SetSearchWindow(float, float);
       void ScanData(std::string);
+      
     private:
       DataFit * m_pcDataFit;
       NIST    * m_pcNIST;

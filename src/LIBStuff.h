@@ -7,5 +7,5 @@
 NIST * g_pcNIST;
 LIBS * g_pcLIBS;
 
-std::Vector<DataSet> m_acDataSets;
+std::vector<DataSet *> g_apcDataSets;
 

@@ -20,7 +20,7 @@ void DataSet::AddDataPoint(double fX, double fY, double fYSD) {
 }
 
 // REQUIREMENT: DATA MUST BE SORTED!
-void DataSet::SetSearchWindow(double fXStart, double fXEnd) {
+void DataSet::SetDomainWindow(double fXStart, double fXEnd, uint8_t nMinNumDatapoints) {
   long nIndex = 0;
 
   while (nIndex < m_nMaxIndex) {
@@ -39,8 +39,8 @@ void DataSet::SetSearchWindow(double fXStart, double fXEnd) {
   }
   m_nEndIndex = nIndex;
 
-  if ((m_nEndIndex - m_nStartIndex) < GetNumberOfFunctionParameters() ) {
-    m_nEndIndex = m_nStartIndex + GetNumberOfFunctionParameters()  + 5;
+  if ((m_nEndIndex - m_nStartIndex) < nMinNumDatapoints ) {
+    m_nEndIndex = m_nStartIndex + nMinNumDatapoints;
   }
 
   std::cout << "DW[" << fXStart << "nm:" << fXEnd << "nm] IW["
@@ -67,7 +67,7 @@ void DataSet::SetSearchWindow(double fXStart, double fXEnd) {
   //std::cout << m_nSelectedSize << " datapoints selected." << std::endl << std::endl;
 }
 
-void DataSet::ClearSearchWindow() {
+void DataSet::ClearDomainWindow() {
   m_bWindowSelected = false;
   m_nSelectedSize = 0;
 

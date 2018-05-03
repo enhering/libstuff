@@ -8,7 +8,7 @@ LIBS::~LIBS() {
 
 }
 
-void LIBS::LoadData(std::string strFileName) {
+void LIBS::LoadData(std::string strFileName, DataSet cDataSet) {
   
   std::string   strLine;
   std::ifstream InputFile;
