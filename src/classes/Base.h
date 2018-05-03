@@ -6,6 +6,10 @@
   #include <fstream>
   #include <vector>
 
+  #include <signal.h>
+  #include <stdlib.h>
+  #include <unistd.h>
+
   #include "TCanvas.h"
   #include "TROOT.h"
   #include "TGraph.h"

@@ -12,6 +12,7 @@
   #include "TMath.h"
 
   #include "Base.h"
+  #include "Dataset.h"
   
   enum FunctionNames {
     GAUSSIAN,
@@ -32,13 +33,16 @@
       DataFit();
       ~DataFit();
 
-      void AddDataPoint(double, double, double);
-      double GetY(long nIndex)   { return m_afY[nIndex]; }
-      double GetX(long nIndex)   { return m_afX[nIndex]; }
-      double GetYSD(long nIndex) { return m_afYSD[nIndex]; }
+      // void AddDataPoint(double, double, double);
+      // double GetY(long nIndex)   { return m_afY[nIndex]; }
+      // double GetX(long nIndex)   { return m_afX[nIndex]; }
+      // double GetYSD(long nIndex) { return m_afYSD[nIndex]; }
 
-      void SetSearchWindow(double, double);
-      void ClearSearchWindow();
+      // void SetSearchWindow(double, double);
+      // void ClearSearchWindow();
+
+      void SetDatasetPointer(DataSet * pcDataSet) { m_pcDataSet = pcDataSet; }
+
       void SetFittingFunction(FunctionNames);
       int  GetNumberOfFunctionParameters();
       void InitializeParameters(std::vector<double> &);
@@ -67,26 +71,29 @@
       static double Linear(const gsl_vector * , double);
 
     private:
-      std::vector<double> m_afX;
-      std::vector<double> m_afY;
-      std::vector<double> m_afYSD;
+      // std::vector<double> m_afX;
+      // std::vector<double> m_afY;
+      // std::vector<double> m_afYSD;
 
-      std::vector<double> m_afSelectedX;
-      std::vector<double> m_afSelectedY;
-      std::vector<double> m_afSelectedYSD;      
+      // std::vector<double> m_afSelectedX;
+      // std::vector<double> m_afSelectedY;
+      // std::vector<double> m_afSelectedYSD;   
+
+      DataSet * m_pcDataSet;   
 
       std::vector<double> m_afInitialParameters;
       bool                m_bParametersIntialized;
 
-      long m_nStartIndex, m_nEndIndex, m_nMaxIndex;
-      bool m_bWindowSelected;
-      long m_nSelectedSize;
+      // long m_nStartIndex, m_nEndIndex, m_nMaxIndex;
+      // bool m_bWindowSelected;
+      // long m_nSelectedSize;
 
       static FunctionNames m_eSelectedFittingFunction;
       uint8_t              m_nNumberOfFittingParameters;
 
       std::vector<double> m_afParameters;
       std::vector<double> m_afParameterErrors;
+
       double m_fChiSqr;
       int    m_nFitStatus;
 

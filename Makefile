@@ -102,6 +102,8 @@ CLASSES=$(CLASSES_SRC_DIR)/Base.h         $(CLASSES_SRC_DIR)/Base.cpp     \
         $(CLASSES_SRC_DIR)/NISTData.h     $(CLASSES_SRC_DIR)/NISTData.cpp  \
         $(CLASSES_SRC_DIR)/LIBS.h         $(CLASSES_SRC_DIR)/LIBS.cpp  \
         $(CLASSES_SRC_DIR)/DataFit.h      $(CLASSES_SRC_DIR)/DataFit.cpp  \
+        $(CLASSES_SRC_DIR)/DataSet.h      $(CLASSES_SRC_DIR)/DataSet.cpp  \
+        $(CLASSES_SRC_DIR)/Spectrum.h     $(CLASSES_SRC_DIR)/Spectrum.cpp  
 
 DESKTOP_EXECUTABLES=$(EXEC_SRC_DIR)/LIBStuff.cpp   $(EXEC_SRC_DIR)/LIBStuff.h
 
@@ -115,10 +117,12 @@ $(OBJDIR)/LIBStuff: $(EXEC_SRC_DIR)/LIBStuff.cpp  \
 	                  $(OBJDIR)/NISTData.o          \
 	                  $(OBJDIR)/LIBS.o              \
 	                  $(OBJDIR)/DataFit.o           \
-	                  $(OBJDIR)/DataSet.o
+	                  $(OBJDIR)/DataSet.o           \
+	                  $(OBJDIR)/Spectrum.o          
 
 	@echo 'LIBStuff'
 	@$(COMPILER) $(EXEC_SRC_DIR)/LIBStuff.cpp  \
+	            $(OBJDIR)/Spectrum.o           \
               $(OBJDIR)/DataFit.o            \
 							$(OBJDIR)/LIBS.o               \
 	            $(OBJDIR)/NIST.o               \
@@ -149,6 +153,13 @@ $(OBJDIR)/LIBS.o: $(CLASSES_SRC_DIR)/LIBS.cpp \
 
 	@echo 'LIBS.o'
 	@$(COMPILER) -c $(CLASSES_SRC_DIR)/LIBS.cpp $(INCLUDES) -o $(OBJDIR)/LIBS.o
+
+$(OBJDIR)/Spectrum.o: $(CLASSES_SRC_DIR)/Spectrum.cpp \
+	                $(CLASSES_SRC_DIR)/Spectrum.h   \
+	                $(OBJDIR)/DataFit.o                   
+
+	@echo 'Spectrum.o'
+	@$(COMPILER) -c $(CLASSES_SRC_DIR)/Spectrum.cpp $(INCLUDES) -o $(OBJDIR)/Spectrum.o	
 
 $(OBJDIR)/DataFit.o: $(CLASSES_SRC_DIR)/DataFit.cpp \
 	                $(CLASSES_SRC_DIR)/DataFit.h      \

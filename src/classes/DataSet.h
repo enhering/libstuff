@@ -12,7 +12,10 @@
       void SetDomainWindow(double, double, uint8_t);
       void ClearDomainWindow();
 
-    private:
+      double GetY(long nIndex)   { return m_afY[nIndex]; }
+      double GetX(long nIndex)   { return m_afX[nIndex]; }
+      double GetYSD(long nIndex) { return m_afYSD[nIndex]; }
+
       std::string m_strName;
 
       std::vector<double> m_afX;

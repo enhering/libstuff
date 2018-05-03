@@ -1,11 +1,21 @@
 #include "DataSet.h"
 
 DataSet::DataSet() {
+  m_nMaxIndex = 0;
+  m_nStartIndex = 0;
 
+  m_nSelectedSize = 0;
+  m_bWindowSelected = false;
+
+  m_afX.reserve(50000);
+  m_afY.reserve(50000);
+  m_afYSD.reserve(50000);
 }
 
 DataSet::~DataSet() {
-
+  m_afX.clear();
+  m_afY.clear();
+  m_afYSD.clear();
 }
 
 void DataSet::AddDataPoint(double fX, double fY, double fYSD) {

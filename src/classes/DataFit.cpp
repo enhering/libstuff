@@ -3,16 +3,6 @@
 FunctionNames DataFit::m_eSelectedFittingFunction = GAUSSIAN;      
 
 DataFit::DataFit() {
-  m_nMaxIndex = 0;
-  m_nStartIndex = 0;
-
-  m_nSelectedSize = 0;
-  m_bWindowSelected = false;
-
-  m_afX.reserve(50000);
-  m_afY.reserve(50000);
-  m_afYSD.reserve(50000);
-
   m_eSelectedFittingFunction = GAUSSIAN;
   m_nNumberOfFittingParameters = 3;
 
@@ -26,73 +16,73 @@ DataFit::~DataFit() {
 
 }
 
-void DataFit::AddDataPoint(double fX, double fY, double fYSD) {
-  m_afX.push_back(fX);
-  m_afY.push_back(fY);
-  m_afYSD.push_back(fYSD);
+// void DataFit::AddDataPoint(double fX, double fY, double fYSD) {
+//   m_afX.push_back(fX);
+//   m_afY.push_back(fY);
+//   m_afYSD.push_back(fYSD);
 
-  m_nMaxIndex++;
+//   m_nMaxIndex++;
 
-  m_nStartIndex = 0;
-  m_nEndIndex = m_nMaxIndex; // ATTENTION HERE! ADDING A NEW DATAPOINT RESETS SEARCH WINDOW!
-}
+//   m_nStartIndex = 0;
+//   m_nEndIndex = m_nMaxIndex; // ATTENTION HERE! ADDING A NEW DATAPOINT RESETS SEARCH WINDOW!
+// }
 
 // REQUIREMENT: DATA MUST BE SORTED!
-void DataFit::SetSearchWindow(double fXStart, double fXEnd) {
-  long nIndex = 0;
+// void DataFit::SetSearchWindow(double fXStart, double fXEnd) {
+//   long nIndex = 0;
 
-  while (nIndex < m_nMaxIndex) {
-    if (m_afX[nIndex] > fXStart) {
-      break;
-    }
-    nIndex++;
-  }
-  m_nStartIndex = nIndex;
+//   while (nIndex < m_nMaxIndex) {
+//     if (m_afX[nIndex] > fXStart) {
+//       break;
+//     }
+//     nIndex++;
+//   }
+//   m_nStartIndex = nIndex;
 
-  while (nIndex < m_nMaxIndex) {
-    if (m_afX[nIndex] > fXEnd) {
-      break;
-    }
-    nIndex++;
-  }
-  m_nEndIndex = nIndex;
+//   while (nIndex < m_nMaxIndex) {
+//     if (m_afX[nIndex] > fXEnd) {
+//       break;
+//     }
+//     nIndex++;
+//   }
+//   m_nEndIndex = nIndex;
 
-  if ((m_nEndIndex - m_nStartIndex) < GetNumberOfFunctionParameters() ) {
-    m_nEndIndex = m_nStartIndex + GetNumberOfFunctionParameters()  + 5;
-  }
+//   if ((m_nEndIndex - m_nStartIndex) < GetNumberOfFunctionParameters() ) {
+//     m_nEndIndex = m_nStartIndex + GetNumberOfFunctionParameters()  + 5;
+//   }
 
-  std::cout << "DW[" << fXStart << "nm:" << fXEnd << "nm] IW["
-            << m_nStartIndex << ":" << m_nEndIndex << "] ";
+//   std::cout << "DW[" << fXStart << "nm:" << fXEnd << "nm] IW["
+//             << m_nStartIndex << ":" << m_nEndIndex << "] ";
 
-  m_bWindowSelected = true;
-  m_nSelectedSize = 0;
+//   m_bWindowSelected = true;
+//   m_nSelectedSize = 0;
 
-  m_afSelectedX.clear();
-  m_afSelectedY.clear();
-  m_afSelectedYSD.clear();
+//   m_afSelectedX.clear();
+//   m_afSelectedY.clear();
+//   m_afSelectedYSD.clear();
 
-  for (long nIndex = m_nStartIndex; nIndex <= m_nEndIndex; nIndex++) {
-    m_afSelectedX.push_back(m_afX[nIndex]);
-    m_afSelectedY.push_back(m_afY[nIndex]);
-    m_afSelectedYSD.push_back(m_afYSD[nIndex]);
+//   for (long nIndex = m_nStartIndex; nIndex <= m_nEndIndex; nIndex++) {
+//     m_afSelectedX.push_back(m_afX[nIndex]);
+//     m_afSelectedY.push_back(m_afY[nIndex]);
+//     m_afSelectedYSD.push_back(m_afYSD[nIndex]);
 
-    m_nSelectedSize++;
+//     m_nSelectedSize++;
 
-    // std::cout << "Selected lambda: " << m_afSelectedX[m_nSelectedSize - 1] <<
-    //              "nm, intensity: "   << m_afSelectedY[m_nSelectedSize - 1] <<
-    //              " counts and std dev: "     << m_afSelectedYSD[m_nSelectedSize - 1] << std::endl;
-  }
-  //std::cout << m_nSelectedSize << " datapoints selected." << std::endl << std::endl;
-}
+//     // std::cout << "Selected lambda: " << m_afSelectedX[m_nSelectedSize - 1] <<
+//     //              "nm, intensity: "   << m_afSelectedY[m_nSelectedSize - 1] <<
+//     //              " counts and std dev: "     << m_afSelectedYSD[m_nSelectedSize - 1] << std::endl;
+//   }
+//   //std::cout << m_nSelectedSize << " datapoints selected." << std::endl << std::endl;
+// }
 
-void DataFit::ClearSearchWindow() {
-  m_bWindowSelected = false;
-  m_nSelectedSize = 0;
+// void DataFit::ClearSearchWindow() {
+//   m_bWindowSelected = false;
+//   m_nSelectedSize = 0;
 
-  m_afSelectedX.clear();
-  m_afSelectedY.clear();
-  m_afSelectedYSD.clear();
-}
+//   m_afSelectedX.clear();
+//   m_afSelectedY.clear();
+//   m_afSelectedYSD.clear();
+// }
 
 void DataFit::SetFittingFunction(FunctionNames eFunction) {
   m_eSelectedFittingFunction = eFunction;
@@ -162,7 +152,6 @@ double DataFit::SelectedLaw(const gsl_vector * padIndependents, double fX) {
   }
   return (0);
 }
-
 
 int DataFit::F(const gsl_vector * x,
                void * data,
@@ -241,11 +230,11 @@ void DataFit::Fit() {
 
   // Find number of data points to use
   size_t n;
-  if (m_bWindowSelected) {
-    n = m_afSelectedX.size();
+  if (m_pcDataSet->m_bWindowSelected) {
+    n = m_pcDataSet->m_afSelectedX.size();
   }
   else {
-    n = m_afX.size();
+    n = m_pcDataSet->m_afX.size();
   }
   //std::cout << "n: " << n ;
 
@@ -265,15 +254,15 @@ void DataFit::Fit() {
   double weights[n];
   
   for (long nIndex = 0; nIndex < n; nIndex++) {
-    if (m_bWindowSelected) {
-      x_i[nIndex] = m_afSelectedX[nIndex];
-      y[nIndex]   = m_afSelectedY[nIndex];
-      weights[nIndex] = m_afSelectedYSD[nIndex]; 
+    if (m_pcDataSet->m_bWindowSelected) {
+      x_i[nIndex] = m_pcDataSet->m_afSelectedX[nIndex];
+      y[nIndex]   = m_pcDataSet->m_afSelectedY[nIndex];
+      weights[nIndex] = m_pcDataSet->m_afSelectedYSD[nIndex]; 
     } 
     else {
-      x_i[nIndex] = m_afX[nIndex];
-      y[nIndex] = m_afY[nIndex];  
-      weights[nIndex] = m_afYSD[nIndex]; 
+      x_i[nIndex] = m_pcDataSet->m_afX[nIndex];
+      y[nIndex] = m_pcDataSet->m_afY[nIndex];  
+      weights[nIndex] = m_pcDataSet->m_afYSD[nIndex]; 
     }    
 
     if (m_bRemoveBakground) {
@@ -436,7 +425,7 @@ void DataFit::Fit() {
 void DataFit::EstimateDataBackground() {
 
   std::cout << "Estimating linear background:" << std::endl;
-  ClearSearchWindow();
+  m_pcDataSet->ClearDomainWindow();
   SetFittingFunction(LINEAR);
 
   std::vector<double> afParam = { 10.0, 0.01 };
