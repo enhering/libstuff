@@ -114,7 +114,8 @@ $(OBJDIR)/LIBStuff: $(EXEC_SRC_DIR)/LIBStuff.cpp  \
 	                  $(OBJDIR)/NIST.o              \
 	                  $(OBJDIR)/NISTData.o          \
 	                  $(OBJDIR)/LIBS.o              \
-	                  $(OBJDIR)/DataFit.o          
+	                  $(OBJDIR)/DataFit.o           \
+	                  $(OBJDIR)/DataSet.o
 
 	@echo 'LIBStuff'
 	@$(COMPILER) $(EXEC_SRC_DIR)/LIBStuff.cpp  \
@@ -122,6 +123,7 @@ $(OBJDIR)/LIBStuff: $(EXEC_SRC_DIR)/LIBStuff.cpp  \
 							$(OBJDIR)/LIBS.o               \
 	            $(OBJDIR)/NIST.o               \
 	            $(OBJDIR)/NISTData.o           \
+	            $(OBJDIR)/DataSet.o            \
 	            $(OBJDIR)/Base.o               \
               $(INCLUDES)  $(LCURL)  $(LGSL) $(LROOT) \
               -o $(BINDIR)/LIBStuff
@@ -143,18 +145,24 @@ $(OBJDIR)/NISTData.o: $(CLASSES_SRC_DIR)/NISTData.cpp \
 
 $(OBJDIR)/LIBS.o: $(CLASSES_SRC_DIR)/LIBS.cpp \
 	                $(CLASSES_SRC_DIR)/LIBS.h   \
-	                $(OBJDIR)/DataFit.o         \
-	                $(OBJDIR)/Base.o           
+	                $(OBJDIR)/DataFit.o                   
 
 	@echo 'LIBS.o'
 	@$(COMPILER) -c $(CLASSES_SRC_DIR)/LIBS.cpp $(INCLUDES) -o $(OBJDIR)/LIBS.o
 
 $(OBJDIR)/DataFit.o: $(CLASSES_SRC_DIR)/DataFit.cpp \
-	                $(CLASSES_SRC_DIR)/DataFit.h   \
-	                $(OBJDIR)/Base.o
+	                $(CLASSES_SRC_DIR)/DataFit.h      \
+	                $(OBJDIR)/DataSet.o               
 
 	@echo 'DataFit.o'
 	@$(COMPILER) -c $(CLASSES_SRC_DIR)/DataFit.cpp $(INCLUDES) -o $(OBJDIR)/DataFit.o
+
+$(OBJDIR)/DataSet.o: $(CLASSES_SRC_DIR)/DataSet.cpp \
+	                $(CLASSES_SRC_DIR)/DataSet.h   \
+	                $(OBJDIR)/Base.o
+
+	@echo 'DataSet.o'
+	@$(COMPILER) -c $(CLASSES_SRC_DIR)/DataSet.cpp $(INCLUDES) -o $(OBJDIR)/DataSet.o
 
 $(OBJDIR)/Base.o: $(CLASSES_SRC_DIR)/Base.cpp \
 	                $(CLASSES_SRC_DIR)/Base.h 
