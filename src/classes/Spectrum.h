@@ -15,7 +15,7 @@
       ~Spectrum();
 
       void SetNISTObjectPointer(NIST * pcNIST) { m_pcNIST = pcNIST; }
-      void SetDatasetArrayRef(std::vector<DataSet *> & apcDataSet) { m_apcDataSet = apcDataSet; }
+      void SetDatasetArrayRef(std::vector<DataSet *>  apcDataSet) { m_apcDataSet = apcDataSet; }
       void ScanData(std::string);
 
     private:

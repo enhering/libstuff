@@ -24,7 +24,7 @@ void Spectrum::ScanData(std::string strElement) {
 
   // -------------------
 
-  FunctionNames eFittingFunction = TRIPLEVOIGT;
+  FunctionNames eFittingFunction = VOIGT;
 
   // --------------------
 
@@ -33,6 +33,7 @@ void Spectrum::ScanData(std::string strElement) {
   double fNISTLambdaN0, fNISTLambdaN1, fNISTLambdaN2;
 
   // --------------------
+  std::cout << "1" << std::endl;
 
   std::ofstream OutputFile;
   std::string strOutputFileName = "FitResults.txt";
@@ -45,7 +46,13 @@ void Spectrum::ScanData(std::string strElement) {
 
   uint8_t nDataSetNum;
 
+  std::cout << "2" << std::endl;
+
   for (nDataSetNum = 0; nDataSetNum < nNumberOfDataSets; nDataSetNum += 1) {
+
+    std::cout << "3" << std::endl;
+
+    m_pcDataFit->SetDatasetPointer(m_apcDataSet[nDataSetNum]);
 
     // m_pcDataFit->EstimateDataBackground();
     // m_pcDataFit->RemoveBackground();
@@ -56,76 +63,77 @@ void Spectrum::ScanData(std::string strElement) {
       nNISTIndex++;
     }
 
-    switch (eFittingFunction) {
-      case TRIPLEVOIGT:
-        // Select two more lines
-        if (nNISTIndex < (m_pcNIST->m_acNISTDataByElement[strElement].m_nNumLines - 3)) {
-          nNISTIndex = nNISTIndex + 2;
-          fNISTLambdaN0 = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex - 2];
-          fNISTLambdaN1 = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex - 1];
-          fNISTLambdaN2 = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex];
-          std::cout << "Searching " << fNISTLambdaN0 << "nm, " 
-                                      << fNISTLambdaN1 << "nm, "
-                                      << fNISTLambdaN2 << "nm:" << std::endl;
-        }
-        else {
-          eFittingFunction = VOIGT;
-          fNISTLambda = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex];
-        }
-        break;      
+    // switch (eFittingFunction) {
+    //   case TRIPLEVOIGT:
+    //     // Select two more lines
+    //     if (nNISTIndex < (m_pcNIST->m_acNISTDataByElement[strElement].m_nNumLines - 3)) {
+    //       nNISTIndex = nNISTIndex + 2;
+    //       fNISTLambdaN0 = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex - 2];
+    //       fNISTLambdaN1 = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex - 1];
+    //       fNISTLambdaN2 = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex];
+    //       std::cout << "Searching " << fNISTLambdaN0 << "nm, " 
+    //                                   << fNISTLambdaN1 << "nm, "
+    //                                   << fNISTLambdaN2 << "nm:" << std::endl;
+    //     }
+    //     else {
+    //       eFittingFunction = VOIGT;
+    //       fNISTLambda = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex];
+    //     }
+    //     break;      
     
-      default: 
-        break;
-    }
+    //   default: 
+    //     break;
+    // }
 
     m_pcDataFit->SetFittingFunction(eFittingFunction);
 
     do {
-      // std::cout << "NIST line: " << fNISTLambda << "nm ";
-      switch (eFittingFunction) {
-        case VOIGT:
-          m_pcDataFit->SetDomainWindow(fNISTLambda - fLambdaHalfWindowWidth, fNISTLambda + fLambdaHalfWindowWidth);
-          break;
-        case TRIPLEVOIGT:
-          m_pcDataFit->SetDomainWindow(fNISTLambdaN0 - fLambdaHalfWindowWidth, fNISTLambdaN2 + fLambdaHalfWindowWidth);
-          break;
-        default:
-          break;
-      }
+
+      std::cout << "NIST line: " << fNISTLambda << "nm " << std::endl;
+      // switch (eFittingFunction) {
+      //   case VOIGT:
+          m_apcDataSet[nDataSetNum]->SetDomainWindow(fNISTLambda - fLambdaHalfWindowWidth, fNISTLambda + fLambdaHalfWindowWidth, 4);
+      //     break;
+      //   case TRIPLEVOIGT:
+      //     m_pcDataFit->SetDomainWindow(fNISTLambdaN0 - fLambdaHalfWindowWidth, fNISTLambdaN2 + fLambdaHalfWindowWidth);
+      //     break;
+      //   default:
+      //     break;
+      // }
 
       // Initialize fitting parameters
       std::vector<double> afParam;
 
       afParam.clear();
 
-      switch (eFittingFunction) {
-        case VOIGT:
+      // switch (eFittingFunction) {
+      //   case VOIGT:
           afParam.push_back(0.1); // Gaussian width
           afParam.push_back(0.1); // Lorentzian width (or vice versa. Sorry. Check CERN's TMAth, please and DataFit::Voigt
           afParam.push_back(fNISTLambda); // Voigt center
           afParam.push_back(100); // Voigt amplitude
-          break;
+      //     break;
 
-        case TRIPLEVOIGT:
-          afParam.push_back(0.1); // Gaussian width
-          afParam.push_back(0.1); // Lorentzian width (or vice versa. Sorry. Check CERN's TMAth, please and DataFit::Voigt
-          afParam.push_back(fNISTLambdaN0); // Voigt center
-          afParam.push_back(100); // Voigt amplitude
+      //   case TRIPLEVOIGT:
+      //     afParam.push_back(0.1); // Gaussian width
+      //     afParam.push_back(0.1); // Lorentzian width (or vice versa. Sorry. Check CERN's TMAth, please and DataFit::Voigt
+      //     afParam.push_back(fNISTLambdaN0); // Voigt center
+      //     afParam.push_back(100); // Voigt amplitude
 
-          afParam.push_back(0.1); // Gaussian width
-          afParam.push_back(0.1); // Lorentzian width (or vice versa. Sorry. Check CERN's TMAth, please and DataFit::Voigt
-          afParam.push_back(fNISTLambdaN1); // Voigt center
-          afParam.push_back(100); // Voigt amplitude
+      //     afParam.push_back(0.1); // Gaussian width
+      //     afParam.push_back(0.1); // Lorentzian width (or vice versa. Sorry. Check CERN's TMAth, please and DataFit::Voigt
+      //     afParam.push_back(fNISTLambdaN1); // Voigt center
+      //     afParam.push_back(100); // Voigt amplitude
 
-          afParam.push_back(0.1); // Gaussian width
-          afParam.push_back(0.1); // Lorentzian width (or vice versa. Sorry. Check CERN's TMAth, please and DataFit::Voigt
-          afParam.push_back(fNISTLambdaN2); // Voigt center
-          afParam.push_back(100); // Voigt amplitude
-          break;
+      //     afParam.push_back(0.1); // Gaussian width
+      //     afParam.push_back(0.1); // Lorentzian width (or vice versa. Sorry. Check CERN's TMAth, please and DataFit::Voigt
+      //     afParam.push_back(fNISTLambdaN2); // Voigt center
+      //     afParam.push_back(100); // Voigt amplitude
+      //     break;
 
-        default:
-          break;
-      }
+      //   default:
+      //     break;
+      // }
        
       m_pcDataFit->InitializeParameters(afParam);
 
@@ -141,8 +149,8 @@ void Spectrum::ScanData(std::string strElement) {
              fCenter, fCenterError,
              fAmplitude, fAmplitudeError;
 
-      switch (eFittingFunction) {
-        case VOIGT:
+      // switch (eFittingFunction) {
+      //   case VOIGT:
           fSigma = afMinimizedParameters[0];
           fSigmaError = afMinimizedParameterErrors[0];
 
@@ -154,26 +162,26 @@ void Spectrum::ScanData(std::string strElement) {
 
           fAmplitude = afMinimizedParameters[3]; 
           fAmplitudeError = afMinimizedParameterErrors[3];
-          break;
+      //     break;
 
-        case TRIPLEVOIGT:
-          // select middle voigt
-          fSigma = afMinimizedParameters[4];
-          fSigmaError = afMinimizedParameterErrors[4];
+      //   case TRIPLEVOIGT:
+      //     // select middle voigt
+      //     fSigma = afMinimizedParameters[4];
+      //     fSigmaError = afMinimizedParameterErrors[4];
 
-          fLg      = afMinimizedParameters[5];
-          fLgError = afMinimizedParameterErrors[5];
+      //     fLg      = afMinimizedParameters[5];
+      //     fLgError = afMinimizedParameterErrors[5];
 
-          fCenter = afMinimizedParameters[6];
-          fCenterError = afMinimizedParameterErrors[6];   
+      //     fCenter = afMinimizedParameters[6];
+      //     fCenterError = afMinimizedParameterErrors[6];   
 
-          fAmplitude = afMinimizedParameters[7]; 
-          fAmplitudeError = afMinimizedParameterErrors[7];
-          break;
+      //     fAmplitude = afMinimizedParameters[7]; 
+      //     fAmplitudeError = afMinimizedParameterErrors[7];
+      //     break;
 
-        default:
-          break;
-      }
+      //   default:
+      //     break;
+      // }
 
       double fChiSqr = m_pcDataFit->GetChiSqr();
       int    nStatus = m_pcDataFit->GetFitStatus();
@@ -222,38 +230,38 @@ void Spectrum::ScanData(std::string strElement) {
 
       nNISTIndex++;
 
-      switch (eFittingFunction) {
-        case TRIPLEVOIGT:
-          // Select two more lines
-          if (nNISTIndex < (m_pcNIST->m_acNISTDataByElement[strElement].m_nNumLines - 3)) {
-            fNISTLambdaN0 = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex - 2];
-            fNISTLambdaN1 = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex - 1];
-            fNISTLambdaN2 = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex];
-            std::cout << "Searching " << fNISTLambdaN0 << "nm, " 
-                                      << fNISTLambdaN1 << "nm, "
-                                      << fNISTLambdaN2 << "nm." << std::endl;
-          }
-          else {
-            eFittingFunction = VOIGT;
-            fNISTLambda = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex];
-          }
-          break;      
-        case VOIGT:
+      // switch (eFittingFunction) {
+      //   case TRIPLEVOIGT:
+      //     // Select two more lines
+      //     if (nNISTIndex < (m_pcNIST->m_acNISTDataByElement[strElement].m_nNumLines - 3)) {
+      //       fNISTLambdaN0 = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex - 2];
+      //       fNISTLambdaN1 = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex - 1];
+      //       fNISTLambdaN2 = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex];
+      //       std::cout << "Searching " << fNISTLambdaN0 << "nm, " 
+      //                                 << fNISTLambdaN1 << "nm, "
+      //                                 << fNISTLambdaN2 << "nm." << std::endl;
+      //     }
+      //     else {
+        //     eFittingFunction = VOIGT;
+        //     fNISTLambda = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex];
+        //   }
+        //   break;      
+        // case VOIGT:
           if (nNISTIndex < m_pcNIST->m_acNISTDataByElement[strElement].m_nNumLines) {
             fNISTLambda = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex];
           }
-          break;
+      //     break;
 
-        default: 
-          break;
-      }
+      //   default: 
+      //     break;
+      // }
       
 
       // std::cin.get();
       
     } while ((fNISTLambda + fLambdaHalfWindowWidth) < fLambdaSearchEnd);
   }
-  
+
   OutputFile.close();
 }
 

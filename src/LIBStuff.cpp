@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
   g_pcLIBS->LoadData("data/fW_162mJ_vis_4microsegundo.txt", g_apcDataSets[6]);
 
   g_pcSpectrum->SetNISTObjectPointer(g_pcNIST);
-  g_pcSpectrum->SetDatasetArrayRef(&g_apcDataSets);
+  g_pcSpectrum->SetDatasetArrayRef(g_apcDataSets);
   g_pcSpectrum->ScanData("W");
 
   app.Run();
