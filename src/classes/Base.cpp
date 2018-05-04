@@ -21,3 +21,4 @@ void Base::rtrim(std::string &s) {
         return !std::isspace(ch);
     }).base(), s.end());
 }
+

@@ -28,6 +28,7 @@
     public: 
       Base();
       ~Base();
+
       void ltrim(std::string &);
       void rtrim(std::string &);
 

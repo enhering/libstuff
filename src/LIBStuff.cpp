@@ -3,6 +3,7 @@
 void Cleanup() {
   while (g_apcDataSets.size() != 0) {
     delete (g_apcDataSets[g_apcDataSets.size()-1]);
+    g_apcDataSets.pop_back();
   }
 }
 

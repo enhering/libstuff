@@ -24,6 +24,7 @@ void Spectrum::ScanData(std::string strElement) {
 
   // -------------------
 
+  m_pcDataFit = new DataFit();
   FunctionNames eFittingFunction = VOIGT;
 
   // --------------------
@@ -57,11 +58,15 @@ void Spectrum::ScanData(std::string strElement) {
     // m_pcDataFit->EstimateDataBackground();
     // m_pcDataFit->RemoveBackground();
 
+    std::cout << "4" << std::endl;
+
     // Search NIST data for first line after window start
     while (fNISTLambda < fLambdaSearchStart + fLambdaHalfWindowWidth) {
       fNISTLambda = m_pcNIST->m_acNISTDataByElement[strElement].m_afObservedWavelength_nm[nNISTIndex];
       nNISTIndex++;
     }
+
+    std::cout << "5" << std::endl;
 
     // switch (eFittingFunction) {
     //   case TRIPLEVOIGT:
@@ -86,6 +91,8 @@ void Spectrum::ScanData(std::string strElement) {
     // }
 
     m_pcDataFit->SetFittingFunction(eFittingFunction);
+
+    bool bLeave = false;
 
     do {
 
@@ -258,8 +265,16 @@ void Spectrum::ScanData(std::string strElement) {
       
 
       // std::cin.get();
+
+      nonblock(1);
+      if (keyState(32)) {
+        bLeave = true;
+      }
+        //32 in ASCII table correspond to Space Bar
+      nonblock(0);
       
-    } while ((fNISTLambda + fLambdaHalfWindowWidth) < fLambdaSearchEnd);
+    } while ( ((fNISTLambda + fLambdaHalfWindowWidth) < fLambdaSearchEnd) ||
+              (!bLeave) );
   }
 
   OutputFile.close();
