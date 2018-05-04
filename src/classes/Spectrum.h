@@ -16,13 +16,16 @@
 
       void SetNISTObjectPointer(NIST * pcNIST) { m_pcNIST = pcNIST; }
       void SetDatasetArrayRef(std::vector<DataSet *>  apcDataSet) { m_apcDataSet = apcDataSet; }
+      void AnalizeFitResult(long);
       void ScanData(std::string);
 
     private:
       NIST * m_pcNIST;
       DataFit * m_pcDataFit;
 
+      std::string m_strSearchElement;
       std::vector<DataSet *> m_apcDataSet;
 
+      std::ofstream m_OutputFile;
   };
 #endif
